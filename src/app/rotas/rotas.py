@@ -1,12 +1,12 @@
 # chamando a classe usuarios_controller
 from src.app.controllers.usuarios_controllers import UsuariosControllers
-from src.app.controllers.arvores_controllers import ArvoresControllers
-from src.app.controllers.auth import login_required
-from flask import render_template, session, redirect, request
-
-
+from src.app.controllers.pilotos_controllers import PilotosControllers
+from src.app.controllers.escuderias_controllers import EscuderiaControllers
+from src.app.middlewares.auth_middleware import auth_middleware
+from flask import request
 usuario_cont = UsuariosControllers()
-arvore_cont = ArvoresControllers()
+piloto_cont = PilotosControllers()
+escuderia_cont = EscuderiaControllers()
 
 def rotas(aplicacao):
     # Evitar problema com o CORS
@@ -18,55 +18,51 @@ def rotas(aplicacao):
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return response
 
-    @aplicacao.route('/')
-    def index():
-        print('Acessou a pagina de ACESSO a aplicacao...')
-        return render_template('login.html')
-
-    @aplicacao.route('/arvores')
-    @login_required
-    def arvores():
-        return arvore_cont.lista_arvore()()
-
-    @aplicacao.route('/inclusaoArvores')
-    @login_required
-    def inclusao_arvores():
-        return arvore_cont.exibe_form_inclusao_arvore()()
+    @aplicacao.route('/api/login', methods=['POST'])
+    def login():
+        return usuario_cont.api_login()
+        
+    @aplicacao.route('/api/piloto/anos-atividade', methods=['GET'])
+    @auth_middleware(tipo_permitido="Piloto")
+    def obter_anos_atividade_piloto(usuario_logado):
+        # Extraimos o driver_ref que é o id_original presente no token
+        driver_ref = usuario_logado.get('id_original')
+        
+        return piloto_cont.api_obter_anos_atividade_piloto(driver_ref)
     
-    @aplicacao.route('/consulta')
-    @login_required
-    def consulta():
-        return arvore_cont.select_arvores_por_status()()
+    @aplicacao.route('/api/piloto/estatisticas', methods=['GET'])
+    @auth_middleware(tipo_permitido="Piloto")
+    def obter_estatisticas_piloto(usuario_logado):
+        # Extraimos o driver_ref que é o id_original presente no token
+        driver_ref = usuario_logado.get('id_original')
+        
+        return piloto_cont.api_obter_estatisticas_piloto(driver_ref)
+    
+    @aplicacao.route('/api/piloto/relatorio-pontos-ano', methods=['GET'])
+    @auth_middleware(tipo_permitido="Piloto")
+    def obter_relatorio_6_piloto(usuario_logado):
+        # Extraimos o driver_ref que é o id_original presente no token
+        driver_ref = usuario_logado.get('id_original')
+        
+        return piloto_cont.api_obter_relatorio_6_piloto(driver_ref)
+    
+    @aplicacao.route('/api/piloto/relatorio-contagem-status', methods=['GET'])
+    @auth_middleware(tipo_permitido="Piloto")
+    def obter_relatorio_7_piloto(usuario_logado):
+        # Extraimos o driver_ref que é o id_original presente no token
+        driver_ref = usuario_logado.get('id_original')
+        
+        return piloto_cont.api_obter_relatorio_7_piloto(driver_ref)
+    
+    @aplicacao.route('/api/escuderia/piloto-arquivo', methods=['POST'])
+    @auth_middleware(tipo_permitido="Escuderia")
+    def inserir_piloto_arquivo_escuderia(usuario_logado):
+        # Obtendo o arquivo enviado na rota
+        arquivo = request.files.get('file') 
+        return escuderia_cont.api_inserir_escuderia_arquivo(arquivo)
+    
+    
+    
 
-    @aplicacao.route('/validaBDUsuarios', methods=['POST'])
-    def valida_bd_usuarios():
-        return usuario_cont.valida_acesso_usuario()()
+    
 
-    @aplicacao.route('/insertBDArvores', methods=['POST'])
-    @login_required
-    def insert_bd_arvores():
-        return arvore_cont.insere_nova_arvore()()
-
-    @aplicacao.route('/inclusaoEspecies')
-    @login_required
-    def inclusao_especies():
-        return arvore_cont.exibe_form_inclusao_especie()()
-
-    @aplicacao.route('/insertBDEspecies', methods=['POST'])
-    @login_required
-    def insert_bd_especies():
-        return arvore_cont.insere_nova_especie()()
-
-    @aplicacao.route('/api/especies', methods=['GET'])
-    @login_required
-    def busca_especies():
-        return arvore_cont.busca_especies()()
-
-    @aplicacao.route('/logout')
-    def logout():
-        """Faz logout do usuário, limpando sessão e cookie"""
-        session.clear()
-        response = redirect("/")
-        # Remove o cookie de autenticação
-        response.set_cookie('auth_token', '', expires=0)
-        return response

@@ -1,0 +1,20 @@
+from src.app.BD.escuderias_dao import Escuderias_dao
+from src.config.database import connection_pool
+from flask import jsonify
+
+
+class EscuderiaControllers:
+    def __init__(self):
+        pass  
+    def api_inserir_escuderia_arquivo(self, arquivo):
+        if not arquivo:
+            return jsonify({"erro": "Nenhum arquivo enviado"}), 400
+        escuderia_dao = Escuderias_dao(connection_pool)
+        dados, erro = escuderia_dao.inserir_escuderia_arquivo(arquivo)
+
+        if erro:
+            status_code = 500 if erro == "Erro interno no servidor" else 404
+            return jsonify({"erro": erro}), status_code
+
+        # Se tudo tiver ok, retornamos os dados e um status 200 (OK)
+        return jsonify(dados), 200
