@@ -43,6 +43,14 @@ def rotas(aplicacao):
         
         return piloto_cont.api_obter_relatorio_6_piloto(driver_ref)
     
+    @aplicacao.route('/api/piloto/relatorio-contagem-status', methods=['GET'])
+    @auth_middleware(tipo_permitido="Piloto")
+    def obter_relatorio_7_piloto(usuario_logado):
+        # Extraimos o driver_ref que é o id_original presente no token
+        driver_ref = usuario_logado.get('id_original')
+        
+        return piloto_cont.api_obter_relatorio_7_piloto(driver_ref)
+    
     
     
 

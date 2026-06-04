@@ -100,3 +100,35 @@ class Pilotos_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+
+    def obter_relatorio_7_piloto(self, driver_ref):
+          # Chamando a função relatorio_contagem_status_piloto e selecionando as colunas status_nome e total_ocorrencias
+        sql = "SELECT status_nome, total_ocorrencias FROM relatorio_contagem_status_piloto(%s)"
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql, (driver_ref,))
+            
+            # Utilizamos o fetchall() pois são várias linhas retornadas
+            resultados = cursor.fetchall()
+            cursor.close()
+
+            if resultados:
+                # Formatando a lista de dicionários para o JSON
+                lista_estatisticas = []
+                for linha in resultados:
+                    lista_estatisticas.append({
+                        "nome": linha[0],
+                        "ocorrencias": linha[1],
+                    })
+                return lista_estatisticas, None
+            else:
+                return [], "Nenhum dado no relatório encontrado para este piloto."
+                
+        except Exception as erro:
+            print(f"Erro ao buscar relatório do piloto: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)

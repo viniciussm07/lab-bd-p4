@@ -100,3 +100,34 @@ BEGIN
         ano DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Optamos por criar um índice do atributo driver_id na tabela de resultados para otimizar a junção da tabela results com a tabela drivers 
+CREATE INDEX idx_results_driver_id ON results(driver_id);
+-- Optamos por criar um índice para o ano extraído da coluna race_data para otimizar o cálculo
+CREATE INDEX idx_races_year ON races( (EXTRACT(YEAR FROM race_date)) );
+
+CREATE OR REPLACE FUNCTION relatorio_pontos_status_piloto(p_driver_ref VARCHAR)
+RETURNS TABLE (
+    -- Declaração das variáveis de retorno: status_nome (nome do status), total_ocorrencias (contagem do status)
+    status_nome TEXT,
+    total_ocorrencias BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.status, 
+        -- Conta a quantidade de resultados por status
+        COUNT(r.id)
+    FROM 
+        results r
+    JOIN 
+        status s ON r.status_id = s.id
+    JOIN 
+        drivers d ON r.driver_id = d.id
+    WHERE 
+        d.driver_ref = p_driver_ref
+    -- Agrupando pelo status
+    GROUP BY 
+        s.status;
+END;
+$$ LANGUAGE plpgsql;
