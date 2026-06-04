@@ -66,3 +66,68 @@ BEGIN
         total_pontos DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION relatorio_pontos_por_ano_piloto(p_driver_ref VARCHAR)
+RETURNS TABLE (
+    -- Declaração das variáveis de retorno: ano (ano da corrida), total_pontos (quantidade total de pontos obtidos pelo piloto), corridas_pontuadas (corridas que o piloto obteve alguma pontuação)
+    ano INT,
+    total_pontos NUMERIC,
+    corridas_pontuadas TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        EXTRACT(YEAR FROM ra.race_date)::INT AS ano,
+        SUM(r.points) AS total_pontos,
+        
+        -- Utilizamos o STRING_AGG para agrupar os nomes das corridas separando-os por vírgula.
+        -- Aqui o CASE garante que somente o nome da corrida em que os pontos obtidos foram > 0, entram na lista de corridas_pontudas.
+        STRING_AGG(CASE WHEN r.points > 0 THEN ra.race_name END, ', ') AS corridas_pontuadas
+        
+    FROM 
+        drivers d
+    JOIN 
+        results r ON d.id = r.driver_id
+    JOIN 
+        races ra ON r.race_id = ra.id
+    WHERE 
+        d.driver_ref = p_driver_ref
+    -- Agrupando pelo ano da corrida
+    GROUP BY 
+        ano
+    -- Ordenando pelo ano em ordem decrescente
+    ORDER BY 
+        ano DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Optamos por criar um índice do atributo driver_id na tabela de resultados para otimizar a junção da tabela results com a tabela drivers 
+CREATE INDEX idx_results_driver_id ON results(driver_id);
+-- Optamos por criar um índice para o ano extraído da coluna race_data para otimizar o cálculo
+CREATE INDEX idx_races_year ON races( (EXTRACT(YEAR FROM race_date)) );
+
+CREATE OR REPLACE FUNCTION relatorio_pontos_status_piloto(p_driver_ref VARCHAR)
+RETURNS TABLE (
+    -- Declaração das variáveis de retorno: status_nome (nome do status), total_ocorrencias (contagem do status)
+    status_nome TEXT,
+    total_ocorrencias BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.status, 
+        -- Conta a quantidade de resultados por status
+        COUNT(r.id)
+    FROM 
+        results r
+    JOIN 
+        status s ON r.status_id = s.id
+    JOIN 
+        drivers d ON r.driver_id = d.id
+    WHERE 
+        d.driver_ref = p_driver_ref
+    -- Agrupando pelo status
+    GROUP BY 
+        s.status;
+END;
+$$ LANGUAGE plpgsql;
