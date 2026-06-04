@@ -27,4 +27,12 @@ def rotas(aplicacao):
         
         return piloto_cont.api_obter_anos_atividade_piloto(driver_ref)
     
+    @aplicacao.route('/api/piloto/estatisticas', methods=['GET'])
+    @auth_middleware(tipo_permitido="Piloto")
+    def obter_estatisticas_piloto(usuario_logado):
+        # Extraimos o driver_ref que é o id_original presente no token
+        driver_ref = usuario_logado.get('id_original')
+        
+        return piloto_cont.api_obter_estatisticas_piloto(driver_ref)
+    
 

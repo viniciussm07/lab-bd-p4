@@ -33,3 +33,38 @@ class Pilotos_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+
+    def obter_estatisticas_piloto(self, driver_ref):
+        # Chamando a função obter_estatisticas_piloto e selecionando o ano, circuito, total_pontos, total_vitorias e total_corridas
+        sql = "SELECT ano, circuito, total_pontos, total_vitorias, total_corridas FROM obter_estatisticas_piloto(%s)"
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql, (driver_ref,))
+            
+            # Utilizamos o fetchall() pois são várias linhas retornadas
+            resultados = cursor.fetchall()
+            cursor.close()
+
+            if resultados:
+                # Formatando a lista de dicionários para o JSON
+                lista_estatisticas = []
+                for linha in resultados:
+                    lista_estatisticas.append({
+                        "ano": linha[0],
+                        "circuito": linha[1],
+                        "total_pontos": float(linha[2]) if linha[2] is not None else 0.0,
+                        "total_vitorias": linha[3],
+                        "total_corridas": linha[4]
+                    })
+                return lista_estatisticas, None
+            else:
+                return [], "Nenhum dado estatístico encontrado para este piloto."
+                
+        except Exception as erro:
+            print(f"Erro ao buscar estatísticas: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
