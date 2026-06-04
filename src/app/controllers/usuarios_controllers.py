@@ -11,43 +11,45 @@ class UsuariosControllers:
         """Inicializa o controller com gerenciador de segurança"""
         self.security = SecurityManager(aplicacao.config['SECRET_KEY'])
     
-    def valida_acesso_usuario(self):
+    def api_login(self):
         def view():
+            dados = request.get_json()
+            
+            if not dados or not dados.get('login') or not dados.get('password'):
+                return jsonify({"erro": "Login e senha são obrigatórios"}), 400
+
+            login_informado = dados.get('login')
+            senha_informada = dados.get('password')
+
             usuario_dao = Usuarios_dao(connection_pool)
-            try:
-                login = request.form.get("login")
-                senha = request.form.get("senha")
-                
-                # Valida credenciais (agora com hash)
-                usuario = usuario_dao.select_na_tabela_usuarios(login, senha)
+            usuario, erro = usuario_dao.autenticar_usuario_f1(login_informado, senha_informada)
 
-                if usuario:
-                    print("USUÁRIO EXISTE!! Está VALIDADO!!")
-                    
-                    # Gera token seguro
-                    token = self.security.generate_token(usuario['email'])
-                    
-                    # Armazena dados na sessão
-                    session["usuario_logado"] = usuario['email']
-                    session["usuario_cpf"] = usuario['cpf']
-                    session["usuario_nome"] = usuario['nome']
-                    session["usuario_papel"] = usuario['papel']
-                    
-                    # Cria resposta e define cookie com token
-                    response = make_response(redirect("/arvores"))
-                    response.set_cookie(
-                        'auth_token',
-                        token,
-                        max_age=86400,  # 24 horas em segundos
-                        httponly=True,  # Proteção contra XSS
-                        secure=False,   # True em produção com HTTPS
-                        samesite='Lax'  # Proteção contra CSRF
-                    )
-                    
-                    return response
+            if erro:
+                status_code = 500 if erro == "Erro interno no servidor" else 401
+                return jsonify({"erro": erro}), status_code
 
-            except Exception as erro:
-                print(f"ERRO NA AUTENTICAÇÃO: {erro}")
-                return redirect("/")
+            payload = {
+                'sub': usuario['userid'],
+                'login': usuario['login'],
+                'tipo': usuario['tipo'],
+                'id_original': usuario['id_original'],
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2) # Expira em 2h
+            }
+            
+            token = jwt.encode(payload, '123456', algorithm='HS256')
 
+            resposta = make_response(jsonify({
+                "mensagem": "Login efetuado com sucesso!",
+                "tipo": usuario['tipo']
+            }))
+
+            resposta.set_cookie(
+                'auth_token',
+                token,
+                httponly=True,
+                secure=False, 
+                max_age=2 * 60 * 60
+            )
+
+            return resposta, 200
         return view

@@ -99,3 +99,54 @@ class Usuarios_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+    def autenticar_usuario_f1(self, login, senha) {
+        """
+        Valida se existe um usuário cadastrado no banco de dados que tem as credenciais passadas como parâmetro.
+        """
+
+        sql_cons_usuarios = """
+            SELECT userid, login, tipo, password, id_original
+            FROM users
+            WHERE login = %s
+        """
+
+        sql_log = """
+            INSERT INTO USERS_LOG (userid, acao) VALUES (%s, 'LOGIN')
+        """
+
+        conn = None
+        
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql_busca, (login,))
+            resultado = cursor.fetchone()
+
+            # Verificando se existe o usuário
+            if resultado:
+                colunas = ["userid", "login", "tipo", "password", "id_original"]
+                usuario = dict(zip(colunas, resultado))
+
+                senha_hash = usuario['password']
+                if self.security.verify_password(senha, senha_hash):
+
+                    cursor.execute(sql_log, (usuario['userid'],))
+                    conn.commit()
+
+                    usuario.pop('password', None)
+                    return usuario, None
+                else:
+                    return None, "Credenciais inválidas"
+            else:
+                return None, "Credenciais inválidas"
+        except Exception as erro:
+            if conn:
+                conn.rollback()
+            print(f"Erro ao autenticar: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                cursor.close()
+                self._db_pool.putconn(conn)
+        
+    }
