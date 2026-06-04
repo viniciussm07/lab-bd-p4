@@ -32,9 +32,9 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 5432
-      DB_USER: arvore_user
-      DB_PASSWORD: arvore_pass
-      DB_NAME: arvore_urbana
+      DB_USER: admin
+      DB_PASSWORD: admin123
+      DB_NAME: formula1_db
     depends_on:
       db:
         condition: service_healthy
