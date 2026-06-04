@@ -1,17 +1,13 @@
 # chamando a classe UsuariosDAO
 from src.app.BD.usuarios_dao import Usuarios_dao
-from src.app.utils.security import SecurityManager
 from src.config.database import connection_pool
-from src.config.app import aplicacao
-from flask import redirect, request, session, make_response, jsonify
+from flask import request, make_response, jsonify
 import jwt
 import datetime
 
 class UsuariosControllers:
     def __init__(self):
-        """Inicializa o controller com gerenciador de segurança"""
-        self.security = SecurityManager(aplicacao.config['SECRET_KEY'])
-    
+        """Inicializa o controller com gerenciador de segurança"""    
     def api_login(self):
             dados = request.get_json()
             print(dados)
@@ -36,8 +32,10 @@ class UsuariosControllers:
                 'id_original': usuario['id_original'],
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2) # Expira em 2h
             }
+            secret_key = "123456"
             
-            token = jwt.encode(payload, '123456', algorithm='HS256')
+            token = jwt.encode(payload, secret_key, algorithm="HS256")
+
 
             resposta = make_response(jsonify({
                 "mensagem": "Login efetuado com sucesso!",

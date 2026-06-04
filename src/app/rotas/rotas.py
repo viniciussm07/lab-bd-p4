@@ -1,8 +1,5 @@
 # chamando a classe usuarios_controller
 from src.app.controllers.usuarios_controllers import UsuariosControllers
-from src.app.controllers.auth import login_required
-from flask import render_template, session, redirect, request
-
 
 usuario_cont = UsuariosControllers()
 
