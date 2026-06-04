@@ -13,9 +13,7 @@ DECLARE
     escuderia RECORD;
     piloto RECORD;
 BEGIN
-    RAISE NOTICE '⏳ Iniciando a carga inicial de usuários...';
-
-    RAISE NOTICE '👤 Criando usuário Admin...';
+    RAISE NOTICE 'Carregando usuario admin...';
     INSERT INTO users (login, password, tipo, id_original)
     VALUES (
         'admin', 
@@ -25,7 +23,7 @@ BEGIN
     )
     ON CONFLICT (login) DO NOTHING;
 
-    RAISE NOTICE '🏎️ Migrando Escuderias...';
+    RAISE NOTICE 'Populando usuarios de escuderias...';
     FOR escuderia IN SELECT constructor_ref FROM constructors 
     LOOP
         INSERT INTO users (login, password, tipo, id_original)
@@ -38,7 +36,7 @@ BEGIN
         ON CONFLICT (login) DO NOTHING;
     END LOOP;
 
-    RAISE NOTICE '🪖 Migrando Pilotos...';
+    RAISE NOTICE 'Populando usuarios pilotos...';
     FOR piloto IN SELECT driver_ref FROM drivers 
     LOOP
         INSERT INTO users (login, password, tipo, id_original)
@@ -51,8 +49,8 @@ BEGIN
         ON CONFLICT (login) DO NOTHING;
     END LOOP;
 
-    RAISE NOTICE '✅ Carga de usuários concluída com sucesso!';
+    RAISE NOTICE 'Finalizado: carga de usuarios concluida.';
     
 EXCEPTION WHEN OTHERS THEN
-    RAISE EXCEPTION '❌ Erro durante a execução do seed: %', SQLERRM;
+    RAISE EXCEPTION 'Erro durante a execução da população dos usuários: %', SQLERRM;
 END $$;
