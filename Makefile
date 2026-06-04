@@ -72,9 +72,6 @@ _restore-dump:
 	if [[ "$$dump" == *.gz ]]; then gunzip -c "$$dump" | $(EXEC_I) $(CONTAINER) psql -v ON_ERROR_STOP=1 -U $(DB_USER) -d $(DB_NAME); \
 	else cat "$$dump" | $(EXEC_I) $(CONTAINER) psql -v ON_ERROR_STOP=1 -U $(DB_USER) -d $(DB_NAME); fi
 
-exec:
-
-
 # Executar query na base (ex: make query QUERY="SELECT * FROM Airports_Audit LIMIT 5;")
 query:
 	$(EXEC_I) $(CONTAINER) psql -U $(DB_USER) -d $(DB_NAME) -c "$(QUERY)"
@@ -83,7 +80,7 @@ psql:
 	$(EXEC) $(CONTAINER) psql -U $(DB_USER) -d $(DB_NAME)
 # Executar um arquivo SQL (ex: make sql_file FILE=exercicios/ex01.sql)
 sql_file:
-	$(EXEC_I) $(CONTAINER) psql -U $(DB_USER) -d $(DB_NAME) -f /home/$(FILE)
+	$(EXEC_I) $(CONTAINER) psql -U $(DB_USER) -d $(DB_NAME) -f $(FILE)
 
 
 # Para containers/rede e dados ./db/data (cluster Postgres).
