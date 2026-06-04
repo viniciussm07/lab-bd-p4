@@ -26,7 +26,8 @@ class UsuariosControllers:
                 return jsonify({"erro": erro}), status_code
 
             payload = {
-                'sub': usuario['userid'],
+                 # Como sub deve ser do tipo str e userid é um campo do tipo int, precisamos converter ele para str 
+                'sub': str(usuario['userid']),
                 'login': usuario['login'],
                 'tipo': usuario['tipo'],
                 'id_original': usuario['id_original'],
