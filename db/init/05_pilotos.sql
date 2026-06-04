@@ -66,3 +66,37 @@ BEGIN
         total_pontos DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION relatorio_pontos_por_ano_piloto(p_driver_ref VARCHAR)
+RETURNS TABLE (
+    -- Declaração das variáveis de retorno: ano (ano da corrida), total_pontos (quantidade total de pontos obtidos pelo piloto), corridas_pontuadas (corridas que o piloto obteve alguma pontuação)
+    ano INT,
+    total_pontos NUMERIC,
+    corridas_pontuadas TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        EXTRACT(YEAR FROM ra.race_date)::INT AS ano,
+        SUM(r.points) AS total_pontos,
+        
+        -- Utilizamos o STRING_AGG para agrupar os nomes das corridas separando-os por vírgula.
+        -- Aqui o CASE garante que somente o nome da corrida em que os pontos obtidos foram > 0, entram na lista de corridas_pontudas.
+        STRING_AGG(CASE WHEN r.points > 0 THEN ra.race_name END, ', ') AS corridas_pontuadas
+        
+    FROM 
+        drivers d
+    JOIN 
+        results r ON d.id = r.driver_id
+    JOIN 
+        races ra ON r.race_id = ra.id
+    WHERE 
+        d.driver_ref = p_driver_ref
+    -- Agrupando pelo ano da corrida
+    GROUP BY 
+        ano
+    -- Ordenando pelo ano em ordem decrescente
+    ORDER BY 
+        ano DESC;
+END;
+$$ LANGUAGE plpgsql;
