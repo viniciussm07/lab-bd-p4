@@ -3,8 +3,9 @@ from src.app.BD.usuarios_dao import Usuarios_dao
 from src.app.utils.security import SecurityManager
 from src.config.database import connection_pool
 from src.config.app import aplicacao
-from flask import redirect, request, session, make_response
-
+from flask import redirect, request, session, make_response, jsonify
+import jwt
+import datetime
 
 class UsuariosControllers:
     def __init__(self):
@@ -12,8 +13,8 @@ class UsuariosControllers:
         self.security = SecurityManager(aplicacao.config['SECRET_KEY'])
     
     def api_login(self):
-        def view():
             dados = request.get_json()
+            print(dados)
             
             if not dados or not dados.get('login') or not dados.get('password'):
                 return jsonify({"erro": "Login e senha são obrigatórios"}), 400
@@ -52,4 +53,3 @@ class UsuariosControllers:
             )
 
             return resposta, 200
-        return view

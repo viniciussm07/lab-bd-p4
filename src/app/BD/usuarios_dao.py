@@ -99,7 +99,7 @@ class Usuarios_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
-    def autenticar_usuario_f1(self, login, senha) {
+    def autenticar_usuario_f1(self, login, senha):
         """
         Valida se existe um usuário cadastrado no banco de dados que tem as credenciais passadas como parâmetro.
         """
@@ -110,16 +110,16 @@ class Usuarios_dao:
             WHERE login = %s
         """
 
-        sql_log = """
-            INSERT INTO USERS_LOG (userid, acao) VALUES (%s, 'LOGIN')
-        """
+        # sql_log = """
+        #     INSERT INTO USERS_LOG (userid, acao) VALUES (%s, 'LOGIN')
+        # """
 
         conn = None
         
         try:
             conn = self._db_pool.getconn()
             cursor = conn.cursor()
-            cursor.execute(sql_busca, (login,))
+            cursor.execute(sql_cons_usuarios, (login,))
             resultado = cursor.fetchone()
 
             # Verificando se existe o usuário
@@ -130,7 +130,7 @@ class Usuarios_dao:
                 senha_hash = usuario['password']
                 if self.security.verify_password(senha, senha_hash):
 
-                    cursor.execute(sql_log, (usuario['userid'],))
+                    # cursor.execute(sql_log, (usuario['userid'],))
                     conn.commit()
 
                     usuario.pop('password', None)
@@ -149,4 +149,4 @@ class Usuarios_dao:
                 cursor.close()
                 self._db_pool.putconn(conn)
         
-    }
+
