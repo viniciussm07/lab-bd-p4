@@ -106,7 +106,7 @@ CREATE INDEX idx_results_driver_id ON results(driver_id);
 -- Optamos por criar um índice para o ano extraído da coluna race_data para otimizar o cálculo
 CREATE INDEX idx_races_year ON races( (EXTRACT(YEAR FROM race_date)) );
 
-CREATE OR REPLACE FUNCTION relatorio_pontos_status_piloto(p_driver_ref VARCHAR)
+CREATE OR REPLACE FUNCTION relatorio_contagem_status_piloto(p_driver_ref VARCHAR)
 RETURNS TABLE (
     -- Declaração das variáveis de retorno: status_nome (nome do status), total_ocorrencias (contagem do status)
     status_nome TEXT,
