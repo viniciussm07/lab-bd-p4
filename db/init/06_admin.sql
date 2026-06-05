@@ -96,25 +96,26 @@ $$ LANGUAGE plpgsql STABLE;
 
 
 --- Corridas da última temporada ---
+DROP FUNCTION IF EXISTS get_latest_season_races();
 CREATE OR REPLACE FUNCTION get_latest_season_races()
-RETURNS TABLE(race_name VARCHAR, circuit_name VARCHAR, race_date DATE, race_time TIME, recorded_laps INT) AS $$
+RETURNS TABLE(race_name TEXT, circuit_name TEXT, race_date DATE, race_time TIME, recorded_laps INT) AS $$
 BEGIN
     RETURN QUERY
     WITH max_season AS (
         SELECT id FROM seasons ORDER BY year DESC LIMIT 1
     )
     SELECT 
-        r.name,
+        r.race_name,
         c.name,
-        r.date,
-        r.time,
+        r.race_date,
+        r.race_time,
         MAX(res.laps)::INT
     FROM races r
     JOIN circuits c ON r.circuit_id = c.id
     LEFT JOIN results res ON r.id = res.race_id
     -- Ajuste aqui: Filtra pela ID da temporada mais recente
     WHERE r.season_id = (SELECT id FROM max_season)
-    GROUP BY r.id, r.name, c.name, r.date, r.time, r.round
+    GROUP BY r.id, r.race_name, c.name, r.race_date, r.race_time, r.round
     ORDER BY r.round;
 END;
 $$ LANGUAGE plpgsql STABLE;
@@ -126,7 +127,7 @@ RETURNS TABLE(constructor_name VARCHAR, total_points NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     WITH max_season AS (
-        SELECT MAX(year) AS ultimo_ano FROM races
+        SELECT MAX(year) AS ultimo_ano FROM seasons
     )
     SELECT 
         c.name,
@@ -134,7 +135,8 @@ BEGIN
     FROM results res
     JOIN races r ON res.race_id = r.id
     JOIN constructors c ON res.constructor_id = c.id
-    WHERE r.year = (SELECT ultimo_ano FROM max_season)
+    JOIN seasons s ON r.season_id = s.id
+    WHERE s.year = (SELECT ultimo_ano FROM max_season)
     GROUP BY c.id, c.name
     ORDER BY SUM(res.points) DESC;
 END;
@@ -147,16 +149,36 @@ RETURNS TABLE(driver_name TEXT, total_points NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     WITH max_season AS (
-        SELECT MAX(year) AS ultimo_ano FROM races
+        SELECT MAX(year) AS ultimo_ano FROM seasons
     )
     SELECT 
         (d.given_name || ' ' || d.family_name)::TEXT,
         SUM(res.points)::NUMERIC
     FROM results res
     JOIN races r ON res.race_id = r.id
+    JOIN seasons s ON r.season_id = s.id
     JOIN drivers d ON res.driver_id = d.id
-    WHERE r.year = (SELECT ultimo_ano FROM max_season)
+    WHERE s.year = (SELECT ultimo_ano FROM max_season)
     GROUP BY d.id, d.given_name, d.family_name
     ORDER BY SUM(res.points) DESC;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+--------------------------------------------------------------------
+--- Relatórios de admin ---
+--------------------------------------------------------------------
+DROP FUNCTION IF EXISTS get_result_status_counts();
+
+CREATE OR REPLACE FUNCTION get_result_status_counts()
+RETURNS TABLE(status INT, count BIGINT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        res.status_id,
+        COUNT(*)::BIGINT
+    FROM results res
+    GROUP BY res.status_id
+    ORDER BY COUNT(*) DESC; -- Ponto e vírgula corrigido e ordenação explícita
 END;
 $$ LANGUAGE plpgsql STABLE;
