@@ -168,17 +168,136 @@ $$ LANGUAGE plpgsql STABLE;
 --------------------------------------------------------------------
 --- Relatórios de admin ---
 --------------------------------------------------------------------
+
+--- Índice na FK para acelerar contagens por status ---
+---CREATE INDEX idx_results_status_id ON results(status_id);
+---DROP INDEX IF EXISTS idx_results_status_id;
+--- Desnecessário ter esse índice, não houve quase nenhum ganho de performance; Nos testes,
+--- com índice foi 1 ms mais lento do que sem índice
+
+
+---------------------------------------------------------------------------
+-- Relatório 1 (Contagem de resultados por status )--
+---------------------------------------------------------------------------
 DROP FUNCTION IF EXISTS get_result_status_counts();
 
+
 CREATE OR REPLACE FUNCTION get_result_status_counts()
-RETURNS TABLE(status INT, count BIGINT) AS $$
+RETURNS TABLE(status TEXT, count BIGINT) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
-        res.status_id,
+        st.status,
         COUNT(*)::BIGINT
     FROM results res
-    GROUP BY res.status_id
+    JOIN status st ON res.status_id = st.id
+    GROUP BY st.status
     ORDER BY COUNT(*) DESC; -- Ponto e vírgula corrigido e ordenação explícita
 END;
 $$ LANGUAGE plpgsql STABLE;
+
+
+
+---------------------------------------------------------------------------
+-- Relatório 2 (Lista aeroportos médios e grandes próximos de uma cidade)--
+---------------------------------------------------------------------------
+--- Índices auxiliares ---
+--- Índice que acelera drasticamente a estratégia do bounding box ---
+DROP INDEX IF EXISTS idx_aiports_coordinates;
+CREATE INDEX idx_airports_coordinates 
+ON airports (latitude_deg, longitude_deg);
+
+
+--- Índice que acelera a busca por nome de cidade (exata) ---
+DROP INDEX IF EXISTS idx_cities_name;
+CREATE INDEX idx_cities_name
+ON cities(name) 
+WHERE country_id = 30;
+
+--- Índice que acelera a filtragem por tipo de aeroporto --- 
+-- CREATE INDEX idx_airports_type_medium_large 
+-- ON airports (airport_type_id) 
+-- WHERE airport_type_id IN (4, 7);
+-- DROP INDEX IF EXISTS idx_airports_type_medium_large;
+    ---Este índice por algum motivo trouxe perda de performance e não ganho, removemos ele
+
+CREATE OR REPLACE FUNCTION get_airport_report_by_city(p_city_name TEXT)
+RETURNS TABLE(
+    cidade_pesquisada TEXT,
+    codigo_iata VARCHAR,
+    nome_aeroporto TEXT,
+    cidade_aeroporto TEXT,
+    distancia_km NUMERIC,
+    tipo_aeroporto TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        c.name::TEXT AS cidade_pesquisada,
+        a.iata_code::VARCHAR AS codigo_iata,
+        a.name::TEXT AS nome_aeroporto,
+        ac.name::TEXT AS cidade_aeroporto,
+        -- Cálculo de Haversine protegido contra estouro de precisão decimal
+        ROUND((6371 * acos(LEAST(GREATEST(
+            cos(radians(c.latitude)) * cos(radians(a.latitude_deg)) * cos(radians(a.longitude_deg) - radians(c.longitude)) + 
+            sin(radians(c.latitude)) * sin(radians(a.latitude_deg))
+        , -1), 1)))::NUMERIC, 2) AS distancia_km,
+        CASE a.airport_type_id 
+            WHEN 4 THEN 'medium_airport'::TEXT 
+            WHEN 7 THEN 'large_airport'::TEXT 
+        END AS tipo_aeroporto
+    FROM cities c
+    JOIN airports a ON 
+        -- Usa Bounding Box para acelerar a consulta, filtrando apenas aeroportos que estejam dentro de uma caixa de 0.9 graus de latitude e 1.2 graus de longitude da cidade (aproximadamente 100 km)
+        -- antes de calcular a distância exata com Haversine
+        a.latitude_deg BETWEEN c.latitude - 0.9 AND c.latitude + 0.9
+        AND a.longitude_deg BETWEEN c.longitude - 1.5 AND c.longitude + 1.5
+    LEFT JOIN cities ac ON a.city_id = ac.id
+    WHERE c.name = p_city_name
+      AND c.country_id = 30 -- Filtrando diretamente o Brasil pelo ID
+      AND a.airport_type_id IN (4, 7)
+      AND (6371 * acos(LEAST(GREATEST(
+            cos(radians(c.latitude)) * cos(radians(a.latitude_deg)) * cos(radians(a.longitude_deg) - radians(c.longitude)) + 
+            sin(radians(c.latitude)) * sin(radians(a.latitude_deg))
+        , -1), 1))) <= 100
+    ORDER BY distancia_km ASC;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+-- Explain analyze para avaliar a performance do relatório de aeroportos com ou sem índices (deixo comentado para facilitar desenvolvimento --- REMOVER DEPOIS ---) ---
+-- EXPLAIN ANALYZE (SELECT 
+--         c.name::TEXT AS cidade_pesquisada,
+--         a.iata_code::VARCHAR AS codigo_iata,
+--         a.name::TEXT AS nome_aeroporto,
+--         ac.name::TEXT AS cidade_aeroporto,
+--         -- Cálculo de Haversine protegido contra estouro de precisão decimal
+--         ROUND((6371 * acos(LEAST(GREATEST(
+--             cos(radians(c.latitude)) * cos(radians(a.latitude_deg)) * cos(radians(a.longitude_deg) - radians(c.longitude)) + 
+--             sin(radians(c.latitude)) * sin(radians(a.latitude_deg))
+--         , -1), 1)))::NUMERIC, 2) AS distancia_km,
+--         CASE a.airport_type_id 
+--             WHEN 4 THEN 'medium_airport'::TEXT 
+--             WHEN 7 THEN 'large_airport'::TEXT 
+--         END AS tipo_aeroporto
+--     FROM cities c
+--     JOIN airports a ON 
+--         -- Usa Bounding Box para acelerar a consulta, filtrando apenas aeroportos que estejam dentro de uma caixa de 0.9 graus de latitude e 1.2 graus de longitude da cidade (aproximadamente 100 km)
+--         -- antes de calcular a distância exata com Haversine
+--         a.latitude_deg BETWEEN c.latitude - 0.9 AND c.latitude + 0.9
+--         AND a.longitude_deg BETWEEN c.longitude - 1.2 AND c.longitude + 1.2
+--     LEFT JOIN cities ac ON a.city_id = ac.id
+--     WHERE c.name = 'Rio de Janeiro'
+--       AND c.country_id = 30 -- Filtrando diretamente o Brasil pelo ID
+--       AND a.airport_type_id IN (4, 7)
+--       AND (6371 * acos(LEAST(GREATEST(
+--             cos(radians(c.latitude)) * cos(radians(a.latitude_deg)) * cos(radians(a.longitude_deg) - radians(c.longitude)) + 
+--             sin(radians(c.latitude)) * sin(radians(a.latitude_deg))
+--         , -1), 1))) <= 100
+--     ORDER BY distancia_km ASC)
+    --_Os índices utilizados aceleraram a consulta de ~10ms para ~0.2 ms, uma melhoria de 50x na performance
+
+    
+---------------------------------------------------------------------------
+-- Relatório 3 (Listar escuderias e relatório multinível)--
+---------------------------------------------------------------------------
