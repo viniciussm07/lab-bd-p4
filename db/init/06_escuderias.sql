@@ -46,7 +46,7 @@ BEGIN
     WHERE 
         -- Comparamos o family_name e o piloto_sobrenome passados como parâmetro utilizando a função UPPER para ser case-insensitive (avaliar letras maiúsculas e minúsculas)
         -- O uso dos curingas "%" permitem realizar uma busca parcial do sobrenome.
-        UPPER(d.family_name) LIKE UPPER('%' || piloto_sobrenome || '%')
+        UPPER(d.family_name) LIKE UPPER(piloto_sobrenome || '%')
         AND c.constructor_ref = piloto_constructor_ref;
 END;
 $$ LANGUAGE plpgsql;
