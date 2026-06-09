@@ -61,6 +61,17 @@ def rotas(aplicacao):
         arquivo = request.files.get('file') 
         return escuderia_cont.api_inserir_escuderia_arquivo(arquivo)
     
+    @aplicacao.route('/api/escuderia/piloto-sobrenome', methods=['GET'])
+    @auth_middleware(tipo_permitido="Escuderia")
+    def consultar_piloto_sobrenome_escuderia(usuario_logado):
+        # Obtendo o sobrenome enviado como parâmetro na URL (ex: ?sobrenome=Senna)
+        sobrenome = request.args.get('sobrenome')
+        
+        # Obtendo o identificador da escuderia logada
+        constructor_ref = usuario_logado.get('id_original')
+        
+        return escuderia_cont.api_consultar_piloto_por_sobrenome(sobrenome, constructor_ref)
+    
     
     
 

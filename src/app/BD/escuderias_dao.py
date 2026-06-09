@@ -45,3 +45,43 @@ class Escuderias_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+
+    def consultar_piloto_por_sobrenome(self, sobrenome, constructor_ref):
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            
+            # Executa a função consultar_piloto_por_sobrenome e retorna as colunas nome_completo, data_nascimento e nacionalidade 
+            cursor.execute(
+                "SELECT nome_completo, data_nascimento, nacionalidade FROM consultar_piloto_por_sobrenome(%s, %s);",
+                (sobrenome, constructor_ref)
+            )
+            
+            resultados = cursor.fetchall()
+            
+            # Se não encontrar nenhuma tupla então retorna uma lista vazia sem erro (None)
+            if not resultados:
+                return [], None
+
+            # Formata os dados retornados do banco para uma lista de dicionários
+            pilotos = []
+            for linha in resultados:
+                pilotos.append({
+                    "nome_completo": linha[0],
+                    # Converte a data para string (formato ISO) para evitar problemas no JSON do Flask
+                    "data_nascimento": linha[1].strftime('%Y-%m-%d') if linha[1] else None,
+                    "nacionalidade": linha[2]
+                })
+            
+            cursor.close()
+            
+            # Segue o padrão de retorno (dados, erro)
+            return pilotos, None
+
+        except Exception as erro:
+            print(f"Erro ao consultar piloto por sobrenome: {erro}")
+            return None, "Erro interno no servidor ao realizar a consulta."
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
