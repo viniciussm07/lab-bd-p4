@@ -69,3 +69,14 @@ class EscuderiaControllers:
 
         # Se tudo tiver ok, retornamos os dados e um status 200 (OK)
         return jsonify(dados), 200
+    
+    def api_obter_relatorio_5_escuderia(self, constructor_ref):
+        escuderia_dao = Escuderias_dao(connection_pool)
+        dados, erro = escuderia_dao.obter_relatorio_5_escuderia(constructor_ref)
+
+        if erro:
+            status_code = 500 if erro == "Erro interno no servidor" else 404
+            return jsonify({"erro": erro}), status_code
+
+        # Se tudo tiver ok, retornamos os dados e um status 200 (OK)
+        return jsonify(dados), 200
