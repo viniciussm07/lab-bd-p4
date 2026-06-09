@@ -158,3 +158,28 @@ BEGIN
         quantidade_vitorias DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION relatorio_contagem_status_escuderia(p_constructor_ref VARCHAR)
+RETURNS TABLE (
+    status_nome TEXT,
+    total_ocorrencias BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.status, 
+        -- Conta a quantidade de resultados por status
+        COUNT(r.id)
+    FROM 
+        results r
+    JOIN 
+        status s ON r.status_id = s.id
+    JOIN 
+        constructors c ON r.constructor_id = c.id
+    WHERE 
+        c.constructor_ref = p_constructor_ref
+    -- Agrupando pelo status
+    GROUP BY 
+        s.status;
+END;
+$$ LANGUAGE plpgsql;
