@@ -50,3 +50,7 @@ BEGIN
         AND c.constructor_ref = piloto_constructor_ref;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Cria um índice para otimizar as buscas por prefixo no sobrenome do piloto
+CREATE INDEX idx_drivers_family_name_prefix 
+ON drivers (UPPER(family_name) varchar_pattern_ops);
