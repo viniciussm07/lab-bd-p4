@@ -95,6 +95,13 @@ def rotas(aplicacao):
         constructor_ref = usuario_logado.get('id_original')
         
         return escuderia_cont.api_obter_anos_atividade_escuderia(constructor_ref)
-
+    
+    @aplicacao.route('/api/escuderia/relatorio-pilotos-vitorias', methods=['GET'])
+    @auth_middleware(tipo_permitido="Escuderia")
+    def obter_relatorio_4_escuderia(usuario_logado):
+        # Obtendo o identificador da escuderia logada
+        constructor_ref = usuario_logado.get('id_original')
+        
+        return escuderia_cont.api_obter_relatorio_4_escuderia(constructor_ref)  
     
 
