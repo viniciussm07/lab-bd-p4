@@ -72,6 +72,13 @@ def rotas(aplicacao):
         
         return escuderia_cont.api_consultar_piloto_por_sobrenome(sobrenome, constructor_ref)
     
+    @aplicacao.route('/api/escuderia/vitorias', methods=['GET'])
+    @auth_middleware(tipo_permitido="Escuderia")
+    def consultar_quantidade_vitorias_escuderia(usuario_logado):
+        # Obtendo o identificador da escuderia logada
+        constructor_ref = usuario_logado.get('id_original')
+        
+        return escuderia_cont.api_consultar_quantidade_vitorias_escuderia(constructor_ref)
     
     
 

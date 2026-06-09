@@ -54,3 +54,25 @@ $$ LANGUAGE plpgsql;
 -- Cria um índice para otimizar as buscas por prefixo no sobrenome do piloto
 CREATE INDEX idx_drivers_family_name_prefix 
 ON drivers (UPPER(family_name) varchar_pattern_ops);
+
+-- Retorna a quantidade de vitórias de uma determinada escudaria.
+CREATE OR REPLACE FUNCTION consultar_quantidade_vitorias_escuderia(
+    p_constructor_ref VARCHAR
+)
+RETURNS TABLE (
+    vitorias BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        COUNT(r.id) AS vitorias
+    FROM 
+        results r
+    JOIN 
+        constructors c ON r.constructor_id = c.id
+    WHERE 
+        -- Filtra apenas os registros em que o piloto da escuderia ficou em 1º lugar
+        r.position_order = 1 
+        AND c.constructor_ref = p_constructor_ref;
+END;
+$$ LANGUAGE plpgsql;
