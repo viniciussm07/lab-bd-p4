@@ -15,3 +15,38 @@ BEGIN
     VALUES (p_ref, p_given, p_family, p_dob, p_country);
 END;
 $$;
+
+
+-- Retorna os dados de um piloto a partir do seu sobrenome, mas apenas se ele já tiver corrido pela escuderia.
+CREATE OR REPLACE FUNCTION consultar_piloto_por_sobrenome(
+    piloto_sobrenome VARCHAR,
+    piloto_constructor_ref VARCHAR
+)
+RETURNS TABLE (
+    nome_completo VARCHAR,
+    data_nascimento DATE,
+    nacionalidade VARCHAR
+) AS $$
+BEGIN
+    RETURN QUERY
+    -- Utilizamos a cláusula DISTINCT porque o piloto pode ter participado de várias corridas 
+    -- pela mesma equipe (existem vários registros em "results"). Vamos listar o piloto uma única vez.
+    SELECT DISTINCT
+        -- Concatena o nome e o sobrenome
+        (d.given_name || ' ' || d.family_name)::VARCHAR AS nome_completo,
+        d.date_of_birth,
+        ct.nationality::VARCHAR AS nacionalidade
+    FROM 
+        drivers d
+    -- JOINs necessários para validar o histórico do piloto (verifica se existem registros de escuderias e pilotos vinculados a um registro de results) com a escuderia logada.
+    JOIN results r ON d.id = r.driver_id
+    JOIN constructors c ON r.constructor_id = c.id
+    -- JOIN para buscar a informação da nacionalidade.
+    JOIN countries ct ON d.country_id = ct.id
+    WHERE 
+        -- Comparamos o family_name e o piloto_sobrenome passados como parâmetro utilizando a função UPPER para ser case-insensitive (avaliar letras maiúsculas e minúsculas)
+        -- O uso dos curingas "%" permitem realizar uma busca parcial do sobrenome.
+        UPPER(d.family_name) LIKE UPPER('%' || piloto_sobrenome || '%')
+        AND c.constructor_ref = piloto_constructor_ref;
+END;
+$$ LANGUAGE plpgsql;
