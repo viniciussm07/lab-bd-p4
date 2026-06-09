@@ -85,3 +85,34 @@ class Escuderias_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+    def consultar_quantidade_vitorias_escuderia(self, constructor_ref):
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            
+            # Executa a função consultar_quantidade_vitorias_escuderia e retorna a quantidade de vitórias
+            cursor.execute(
+                "SELECT vitorias FROM consultar_quantidade_vitorias_escuderia(%s);",
+                (constructor_ref,)
+            )
+            
+            resultado = cursor.fetchone()
+
+            # Se não encontrar nenhuma tupla então retorna um dicionário com o número de vitórias e sem erro (None)
+            if not resultado:
+                return {"vitorias": 0}, None
+
+            dados = {"vitorias": resultado[0]}
+            
+            cursor.close()
+
+            # Segue o padrão de retorno (dados, erro)
+            return dados, None
+
+        except Exception as erro:
+            print(f"Erro ao consultar quantidade de vitórias da escuderia: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
