@@ -116,7 +116,7 @@ class Escuderias_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
-                
+
     def consultar_quantidade_pilotos_escuderia(self, constructor_ref):
         conn = None
         try:
@@ -144,6 +144,41 @@ class Escuderias_dao:
 
         except Exception as erro:
             print(f"Erro ao consultar a quantidade de pilotos da escuderia: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
+                
+    def obter_anos_atividade_escuderia(self, constructor_ref):
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            
+            # Executa a função obter_anos_atividade_escuderia e retorna o primeiro e o último ano
+            cursor.execute(
+                "SELECT primeiro_ano, ultimo_ano FROM obter_anos_atividade_escuderia(%s);",
+                (constructor_ref,)
+            )
+            
+            resultado = cursor.fetchone()
+
+            # Se não encontrar nenhuma tupla (ou se os anos retornarem nulos), retorna um dicionário com None e sem erro
+            if not resultado or resultado[0] is None:
+                return {"primeiro_ano": None, "ultimo_ano": None}, None
+
+            dados = {
+                "primeiro_ano": resultado[0],
+                "ultimo_ano": resultado[1]
+            }
+            
+            cursor.close()
+
+            # Segue o padrão de retorno (dados, erro)
+            return dados, None
+
+        except Exception as erro:
+            print(f"Erro ao consultar os anos de atividade da escuderia: {erro}")
             return None, "Erro interno no servidor"
         finally:
             if conn:
