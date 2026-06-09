@@ -76,3 +76,26 @@ BEGIN
         AND c.constructor_ref = p_constructor_ref;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Retorna a quantidade de pilotos que correram pela escuderia.
+CREATE OR REPLACE FUNCTION consultar_quantidade_pilotos_escuderia(
+    p_constructor_ref VARCHAR
+)
+RETURNS TABLE (
+    numero_pilotos BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    -- Utilizamos a cláusula DISTINCT porque o piloto pode ter participado de várias corridas 
+    -- pela mesma equipe (existem vários registros em "results"). Vamos contar cada piloto uma única vez
+    SELECT 
+        COUNT (DISTINCT r.driver_id) AS numero_pilotos
+    FROM 
+        constructors c
+    JOIN
+        results r ON c.id = r.constructor_id
+    WHERE 
+        c.constructor_ref = p_constructor_ref;
+
+END;
+$$ LANGUAGE plpgsql;
