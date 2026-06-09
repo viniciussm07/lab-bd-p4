@@ -99,3 +99,29 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+
+-- Retorna o primeiro e último ano de atividade da escuderia (ano do primeiro e último registro da tabela results)
+CREATE OR REPLACE FUNCTION obter_anos_atividade_escuderia(p_constructor_ref VARCHAR)
+RETURNS TABLE (
+    primeiro_ano INT,
+    ultimo_ano INT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        -- Utilizamos as funções agregadas (MIN e MAX) para pegar o primeiro e último ano
+        -- Além disso utilizamos a função EXTRACT para extrair o ano da coluna race_date
+        MIN(EXTRACT(YEAR FROM ra.race_date))::INT AS primeiro_ano,
+        MAX(EXTRACT(YEAR FROM ra.race_date))::INT AS ultimo_ano
+    FROM 
+        constructors c
+    JOIN 
+        results r ON c.id = r.constructor_id
+    -- Esse JOIN é necessário, pois não temos a informação de qual a data em que a escuderia participou na tabela results.
+    JOIN 
+        races ra ON r.race_id = ra.id
+    WHERE 
+        -- Filtramos pelo constructor_ref passado como parâmetro
+        c.constructor_ref = p_constructor_ref;
+END;
+$$ LANGUAGE plpgsql;
