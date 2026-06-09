@@ -125,3 +125,36 @@ BEGIN
         c.constructor_ref = p_constructor_ref;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Retorna o nome completo dos pilotos e a quantidade de vitórias que cada um obteve
+CREATE OR REPLACE FUNCTION relatorio_pilotos_vitorias(
+    p_constructor_ref VARCHAR
+)
+RETURNS TABLE (
+    nome_completo VARCHAR,
+    quantidade_vitorias BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        -- Concatena o nome e o sobrenome (nome completo)
+        (d.given_name || ' ' || d.family_name)::VARCHAR AS nome_completo,
+        -- Conta quantas vezes esse piloto aparece no WHERE (quantas vitórias)
+        COUNT(r.id) AS quantidade_vitorias
+    FROM 
+        results r
+    JOIN 
+        constructors c ON r.constructor_id = c.id
+    JOIN 
+        drivers d ON r.driver_id = d.id
+    WHERE 
+        c.constructor_ref = p_constructor_ref
+        AND r.position_order = 1
+    GROUP BY 
+        -- Agrupamos pelo ID do piloto para garantir que pilotos homônimos (pilotos com mesmo nome e sobrenome) não sejam mesclados e pelas colunas de nome e sobrenome
+        d.id, d.given_name, d.family_name
+    ORDER BY 
+        -- Ordena do piloto com mais vitórias para o com menos vitórias
+        quantidade_vitorias DESC;
+END;
+$$ LANGUAGE plpgsql;
