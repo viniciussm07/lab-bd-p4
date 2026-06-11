@@ -3,7 +3,7 @@ from src.app.controllers.usuarios_controllers import UsuariosControllers
 from src.app.controllers.pilotos_controllers import PilotosControllers
 from src.app.controllers.escuderias_controllers import EscuderiaControllers
 from src.app.middlewares.auth_middleware import auth_middleware
-from flask import request
+from flask import request, render_template
 usuario_cont = UsuariosControllers()
 piloto_cont = PilotosControllers()
 escuderia_cont = EscuderiaControllers()
@@ -13,9 +13,10 @@ def rotas(aplicacao):
     @aplicacao.after_request
     def after_request(response):
         response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Origin'] = "http://localhost"
+        response.headers['Access-Control-Allow-Origin'] = "http://127.0.0.1:5500"
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        response.headers["Access-Control-Allow-Credentials"] = "true"
         return response
 
     @aplicacao.route('/api/login', methods=['POST'])
@@ -111,4 +112,13 @@ def rotas(aplicacao):
         constructor_ref = usuario_logado.get('id_original')
         
         return escuderia_cont.api_obter_relatorio_5_escuderia(constructor_ref)
+    
+    # Views/Telas
+        
+    @aplicacao.route('/piloto/dashboard', methods=['GET'])
+    @auth_middleware(tipo_permitido="Piloto")
+    def view_dashboard_piloto(usuario_logado):
+        
+        return render_template('dashboard_piloto.html')
+    
 

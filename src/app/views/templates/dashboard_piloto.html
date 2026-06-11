@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR" class="bg-zinc-950">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard do Piloto | Sistema F1</title>
+    <meta
+      name="description"
+      content="Dashboard de desempenho do piloto - Sistema de banco de dados da Fórmula 1"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --f1-bg: #15151e;
+        --f1-text-highlight: #e43834;
+      }
+
+      .card {
+        background-color: var(--f1-bg);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-zinc-100">
+    <div class="min-h-full">
+      <nav class="bg-[--f1-bg]">
+        <div class="mx-auto max-w-7xl px-4">
+          <div class="flex h-16 items-center justify-between">
+            <div class="flex gap-2 items-center">
+              <div>
+                <img src="/estatico/resources/icone-f1.png" class="size-20" />
+              </div>
+              <div class="flex">
+                <a href="/dashboard" class="px-2 py-1">Dashboard</a>
+                <a href="/relatorio" class="px-2 py-1">Relatório</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div class="dashboard mx-auto max-w-7xl py-8"></div>
+    </div>
+    <table
+      class="mx-auto max-w-7xl w-full border-separate border-spacing-x-2 metrics-table"
+    >
+      <tr>
+        <th class="text-left py-2">Ano</th>
+        <th class="text-left py-2">Circuito</th>
+        <th class="text-left py-2">Qtd de pontos</th>
+        <th class="text-left py-2">Vitórias</th>
+        <th class="text-left py-2">Qtd total de corridas</th>
+      </tr>
+    </table>
+    <footer class="border-t border-zinc-800 py-6">
+      <div
+        class="mx-auto max-w-7xl px-4 text-center text-zinc-500 sm:px-6 lg:px-8"
+      >
+        <p>Desenvolvido por:</p>
+        <ul>
+          <li>Cleverson Cristian Oliveira Sousa</li>
+          <li>Vinicius Soares Martin</li>
+          <li>Caio Delgado Pires</li>
+        </ul>
+      </div>
+    </footer>
+    <script>
+      const API_BASE_URL = "http://localhost:3001";
+
+      async function fetchDriverDashboardData() {
+        try {
+          const metricsResult = await fetch(
+            `${API_BASE_URL}/api/piloto/estatisticas`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+            },
+          );
+
+          const yearsActivityResult = await fetch(
+            `${API_BASE_URL}/api/piloto/anos-atividade`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+            },
+          );
+
+          const metricsData = await metricsResult.json();
+          const yearsActivityData = await yearsActivityResult.json();
+
+          return {
+            yearsActivityData,
+            metricsData,
+          };
+        } catch (err) {
+          alert("Error");
+        }
+      }
+      async function renderDriverDashboardData() {
+        const data = await fetchDriverDashboardData();
+        renderDriverYearsActivityDashboardData(data.yearsActivityData);
+        renderDriverMetricsDashboardData(data.metricsData);
+      }
+
+      async function renderDriverYearsActivityDashboardData(yearsActivity) {
+        const driverData = await fetchDriverDashboardData();
+        const dashboardElement = document.querySelector(".dashboard");
+        const yearsActivityElement = document.createElement("div");
+        yearsActivityElement.classList.add(
+          "years-activity",
+          "grid",
+          "grid-cols-2",
+          "gap-2",
+        );
+        const firstYearCardElement = document.createElement("div");
+        const lastYearCardElement = document.createElement("div");
+        firstYearCardElement.classList.add("card");
+        lastYearCardElement.classList.add("card");
+        const dataFirstYearCardElement = document.createElement("p");
+        dataFirstYearCardElement.classList.add("text-5xl", "font-bold");
+        dataFirstYearCardElement.innerText = yearsActivity.primeiro_ano;
+        const dataLastYearCardElement = document.createElement("p");
+        dataLastYearCardElement.classList.add("text-5xl", "font-bold");
+        dataLastYearCardElement.innerText = yearsActivity.ultimo_ano;
+
+        const labelFirstYearCardElement = document.createElement("p");
+        labelFirstYearCardElement.innerHTML = "Primeiro ano";
+
+        const labelLastYearCardElement = document.createElement("p");
+        labelLastYearCardElement.innerHTML = "Último ano";
+
+        firstYearCardElement.append(labelFirstYearCardElement);
+        firstYearCardElement.append(dataFirstYearCardElement);
+
+        lastYearCardElement.append(labelLastYearCardElement);
+        lastYearCardElement.append(dataLastYearCardElement);
+
+        yearsActivityElement.append(firstYearCardElement);
+        yearsActivityElement.append(lastYearCardElement);
+        dashboardElement.append(yearsActivityElement);
+      }
+
+      async function renderDriverYearsActivityDashboardData(yearsActivity) {
+        const driverData = await fetchDriverDashboardData();
+        const dashboardElement = document.querySelector(".dashboard");
+        const yearsActivityElement = document.createElement("div");
+        yearsActivityElement.classList.add(
+          "years-activity",
+          "grid",
+          "grid-cols-2",
+          "gap-2",
+        );
+        const firstYearCardElement = document.createElement("div");
+        const lastYearCardElement = document.createElement("div");
+        firstYearCardElement.classList.add("card");
+        lastYearCardElement.classList.add("card");
+        const dataFirstYearCardElement = document.createElement("p");
+        dataFirstYearCardElement.classList.add("text-5xl", "font-bold");
+        dataFirstYearCardElement.innerText = yearsActivity.primeiro_ano;
+        const dataLastYearCardElement = document.createElement("p");
+        dataLastYearCardElement.classList.add("text-5xl", "font-bold");
+        dataLastYearCardElement.innerText = yearsActivity.ultimo_ano;
+
+        const labelFirstYearCardElement = document.createElement("p");
+        labelFirstYearCardElement.innerHTML = "Primeiro ano";
+
+        const labelLastYearCardElement = document.createElement("p");
+        labelLastYearCardElement.innerHTML = "Último ano";
+
+        firstYearCardElement.append(labelFirstYearCardElement);
+        firstYearCardElement.append(dataFirstYearCardElement);
+
+        lastYearCardElement.append(labelLastYearCardElement);
+        lastYearCardElement.append(dataLastYearCardElement);
+
+        yearsActivityElement.append(firstYearCardElement);
+        yearsActivityElement.append(lastYearCardElement);
+        dashboardElement.append(yearsActivityElement);
+      }
+
+      async function renderDriverMetricsDashboardData(metrics) {
+        console.log(metrics);
+        const tableMetricsElement = document.querySelector(".metrics-table");
+        for (const metric of metrics) {
+          const trTableMetricsElement = document.createElement("tr");
+          for (const [key, value] of Object.entries(metric)) {
+            const tdTableMetricsElement = document.createElement("td");
+            tdTableMetricsElement.classList.add("text-left", "py-3");
+            tdTableMetricsElement.innerText = value;
+            trTableMetricsElement.append(tdTableMetricsElement);
+          }
+          tableMetricsElement.append(trTableMetricsElement);
+        }
+      }
+
+      renderDriverDashboardData();
+    </script>
+  </body>
+</html>
