@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR" class="bg-zinc-950">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatórios do Piloto | Sistema F1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --f1-bg: #15151e;
+        --f1-text-highlight: #e43834;
+      }
+      .card {
+        background-color: var(--f1-bg);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-zinc-100">
+    <div class="min-h-full">
+      <nav class="bg-[--f1-bg]">
+        <div class="mx-auto max-w-7xl px-4">
+          <div class="flex h-16 items-center justify-between">
+            <div class="flex gap-2 items-center">
+              <div>
+                <img src="/estatico/resources/icone-f1.png" class="size-20" />
+              </div>
+              <div class="flex">
+                <a href="/dashboard" class="px-2 py-1">Dashboard</a>
+                <a
+                  href="/relatorios"
+                  class="px-2 py-1 font-bold text-[--f1-text-highlight]"
+                  >Relatórios</a
+                >
+              </div>
+            </div>
+            <div>
+              <p class="nome-piloto font-bold"></p>
+              <p class="nome-escuderia text-sm text-zinc-300"></p>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div class="mx-auto max-w-7xl py-8 px-4 flex gap-8">
+        <div class="w-1/4 flex flex-col gap-4">
+          <button onclick="carregarRelatorio6()" class="card text-left">
+            Relatório 6: Pontos por Ano
+          </button>
+          <button onclick="carregarRelatorio7()" class="card text-left">
+            Relatório 7: Status
+          </button>
+        </div>
+        <div class="w-3/4 card">
+          <table
+            class="w-full border-separate border-spacing-x-2 report-table"
+          ></table>
+        </div>
+      </div>
+    </div>
+
+    <footer class="border-t border-zinc-800 py-6">
+      <div
+        class="mx-auto max-w-7xl px-4 text-center text-zinc-500 sm:px-6 lg:px-8"
+      >
+        <p>Desenvolvido por:</p>
+        <ul>
+          <li>Cleverson Cristian Oliveira Sousa</li>
+          <li>Vinicius Soares Martin</li>
+          <li>Caio Delgado Pires</li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      const API_BASE_URL = "http://localhost:3001";
+
+      async function carregarPerfil() {
+        const result = await fetch(`${API_BASE_URL}/api/me`, {
+          credentials: "include",
+        });
+        const profile = await result.json();
+        document.querySelector(".nome-piloto").innerHTML = profile.nome_piloto;
+        document.querySelector(".nome-escuderia").innerHTML =
+          profile.nome_escuderia;
+      }
+
+      async function carregarRelatorio6() {
+        const result = await fetch(
+          `${API_BASE_URL}/api/piloto/relatorio-pontos-ano`,
+          { credentials: "include" },
+        );
+        const data = await result.json();
+        const table = document.querySelector(".report-table");
+        table.innerHTML = `
+            <tr>
+                <th class="text-left py-2">Ano</th>
+                <th class="text-left py-2">Pontos</th>
+                <th class="text-left py-2">Corridas</th>
+            </tr>`;
+        data.forEach((item) => {
+          table.innerHTML += `<tr><td class="text-left py-3">${item.ano}</td><td class="text-left py-3">${item.total_pontos}</td><td class="text-left py-3">${item.corridas_pontuadas ? item.corridas_pontuadas : ""}</td></tr>`;
+        });
+      }
+
+      async function carregarRelatorio7() {
+        const result = await fetch(
+          `${API_BASE_URL}/api/piloto/relatorio-contagem-status`,
+          { credentials: "include" },
+        );
+        const data = await result.json();
+        const table = document.querySelector(".report-table");
+        table.innerHTML = `
+            <tr>
+                <th class="text-left py-2">Status</th>
+                <th class="text-left py-2">Ocorrências</th>
+            </tr>`;
+        data.forEach((item) => {
+          table.innerHTML += `<tr><td>${item.nome}</td><td class="text-left py-3">${item.ocorrencias}</td></tr>`;
+        });
+      }
+
+      carregarPerfil();
+    </script>
+  </body>
+</html>
