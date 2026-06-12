@@ -20,9 +20,12 @@ def auth_middleware(tipo_permitido=None):
                 # Decodificamos o token
                 payload = jwt.decode(token, secret_key, algorithms=["HS256"])
                 print(payload)
-                
+                # Caso tipo_permitido seja uma lista, então verificamos se o tipo do usuário é compátivel com algum tipo passado na lista.
+                if isinstance(tipo_permitido, list):
+                    if payload.get('tipo') not in tipo_permitido:
+                        return jsonify({"erro": f"Acesso negado. Rota exclusiva para {tipo_permitido}."}), 403
                 # Verificamos se o tipo extraído do token é de fato um Piloto, se não for retornamos um erro e um status 403 (Forbidden)
-                if tipo_permitido and payload.get('tipo') != tipo_permitido:
+                elif tipo_permitido and payload.get('tipo') != tipo_permitido:
                     return jsonify({"erro": f"Acesso negado. Rota exclusiva para {tipo_permitido}."}), 403
 
                 kwargs['usuario_logado'] = payload

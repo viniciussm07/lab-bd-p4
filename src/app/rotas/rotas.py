@@ -113,12 +113,24 @@ def rotas(aplicacao):
         
         return escuderia_cont.api_obter_relatorio_5_escuderia(constructor_ref)
     
+    # Rotas comuns da API a todos os tipos de usuários
+    @aplicacao.route('/api/me', methods=['GET'])
+    @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
+    def obter_nome_escuderia_piloto(usuario_logado):
+        tipo = usuario_logado.get('tipo')
+        driver_ref = usuario_logado.get('id_original')
+        if tipo == 'Piloto':
+            return piloto_cont.api_obter_nome_escuderia_piloto(driver_ref)
+
     # Views/Telas
-        
-    @aplicacao.route('/piloto/dashboard', methods=['GET'])
-    @auth_middleware(tipo_permitido="Piloto")
-    def view_dashboard_piloto(usuario_logado):
-        
-        return render_template('dashboard_piloto.html')
+    @aplicacao.route('/dashboard', methods=['GET'])
+    @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
+    def view_dashboard(usuario_logado):
+        tipo = usuario_logado.get('tipo')
+        if tipo == 'Piloto':
+            return render_template('dashboard_piloto.html')
+
+    
+
     
 

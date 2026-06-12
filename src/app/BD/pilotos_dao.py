@@ -132,3 +132,43 @@ class Pilotos_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+        
+    def obter_nome_escuderia_piloto(self, driver_ref): 
+        
+        # Chamando uma query simples que vai retornar apenas o nome do piloto e a escuderia da qual ele está vinculado
+        # Ordenamos pelo race_id para buscar a escuderia atual a qual o piloto está correndo.
+        sql = """SELECT c.name AS nome_escuderia, d.given_name || ' ' || d.family_name AS nome_piloto
+                    FROM drivers d
+                    JOIN results r ON r.driver_id = d.id
+                    JOIN constructors c ON c.id = r.constructor_id
+                    WHERE d.driver_ref = %s
+                    ORDER BY r.race_id DESC 
+                    LIMIT 1;
+        """
+        
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            
+
+            cursor.execute(sql, (driver_ref,))
+            resultado = cursor.fetchone()
+            
+            cursor.close()
+
+            # Se a função retornar os dados, criamos um dicionário com os dados retornados
+            if resultado and resultado[0] is not None:
+                return {
+                    "nome_escuderia": resultado[0],
+                    "nome_piloto": resultado[1]
+                }, None
+            else:
+                return None, "Nenhum dado encontrado para este piloto."
+                
+        except Exception as erro:
+            print(f"Erro ao buscar anos de atividade: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)

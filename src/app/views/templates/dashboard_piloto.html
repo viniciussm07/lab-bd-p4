@@ -42,6 +42,10 @@
                 <a href="/relatorio" class="px-2 py-1">Relatório</a>
               </div>
             </div>
+            <div>
+              <p class="nome-piloto font-bold"></p>
+              <p class="nome-escuderia text-sm text-zinc-300"></p>
+            </div>
           </div>
         </div>
       </nav>
@@ -95,12 +99,20 @@
             },
           );
 
+          const profileResult = await fetch(`${API_BASE_URL}/api/me`, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+
           const metricsData = await metricsResult.json();
           const yearsActivityData = await yearsActivityResult.json();
-
+          const profileData = await profileResult.json();
           return {
             yearsActivityData,
             metricsData,
+            profileData,
           };
         } catch (err) {
           alert("Error");
@@ -110,44 +122,7 @@
         const data = await fetchDriverDashboardData();
         renderDriverYearsActivityDashboardData(data.yearsActivityData);
         renderDriverMetricsDashboardData(data.metricsData);
-      }
-
-      async function renderDriverYearsActivityDashboardData(yearsActivity) {
-        const driverData = await fetchDriverDashboardData();
-        const dashboardElement = document.querySelector(".dashboard");
-        const yearsActivityElement = document.createElement("div");
-        yearsActivityElement.classList.add(
-          "years-activity",
-          "grid",
-          "grid-cols-2",
-          "gap-2",
-        );
-        const firstYearCardElement = document.createElement("div");
-        const lastYearCardElement = document.createElement("div");
-        firstYearCardElement.classList.add("card");
-        lastYearCardElement.classList.add("card");
-        const dataFirstYearCardElement = document.createElement("p");
-        dataFirstYearCardElement.classList.add("text-5xl", "font-bold");
-        dataFirstYearCardElement.innerText = yearsActivity.primeiro_ano;
-        const dataLastYearCardElement = document.createElement("p");
-        dataLastYearCardElement.classList.add("text-5xl", "font-bold");
-        dataLastYearCardElement.innerText = yearsActivity.ultimo_ano;
-
-        const labelFirstYearCardElement = document.createElement("p");
-        labelFirstYearCardElement.innerHTML = "Primeiro ano";
-
-        const labelLastYearCardElement = document.createElement("p");
-        labelLastYearCardElement.innerHTML = "Último ano";
-
-        firstYearCardElement.append(labelFirstYearCardElement);
-        firstYearCardElement.append(dataFirstYearCardElement);
-
-        lastYearCardElement.append(labelLastYearCardElement);
-        lastYearCardElement.append(dataLastYearCardElement);
-
-        yearsActivityElement.append(firstYearCardElement);
-        yearsActivityElement.append(lastYearCardElement);
-        dashboardElement.append(yearsActivityElement);
+        renderDriverProfileDashboardData(data.profileData);
       }
 
       async function renderDriverYearsActivityDashboardData(yearsActivity) {
@@ -201,6 +176,12 @@
           }
           tableMetricsElement.append(trTableMetricsElement);
         }
+      }
+
+      async function renderDriverProfileDashboardData(profile) {
+        document.querySelector(".nome-piloto").innerHTML = profile.nome_piloto;
+        document.querySelector(".nome-escuderia").innerHTML =
+          profile.nome_escuderia;
       }
 
       renderDriverDashboardData();
