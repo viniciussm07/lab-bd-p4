@@ -35,7 +35,7 @@ class Usuarios_dao:
 
                 senha_hash = usuario['password']
                 if verify_password(senha, senha_hash):
-
+                    self.registrar_log_login(usuario['userid'])
                     # cursor.execute(sql_log, (usuario['userid'],))
                     conn.commit()
 
@@ -53,6 +53,34 @@ class Usuarios_dao:
         finally:
             if conn:
                 cursor.close()
+                self._db_pool.putconn(conn)
+    def registrar_log_logout(self, userid):
+        sql = "INSERT INTO USERS_LOG (userid, tipo_acao, data_hora) VALUES (%s, 'LOGOUT', NOW())"
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql, (userid,))
+            conn.commit()
+            cursor.close()
+        except Exception as e:
+            print(f"Erro ao salvar log de logout: {e}")
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
+    def registrar_log_login(self, userid):
+        sql = "INSERT INTO USERS_LOG (userid, tipo_acao, data_hora) VALUES (%s, 'LOGIN', NOW())"
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql, (userid,))
+            conn.commit()
+            cursor.close()
+        except Exception as e:
+            print(f"Erro ao salvar log de login: {e}")
+        finally:
+            if conn:
                 self._db_pool.putconn(conn)
         
 
