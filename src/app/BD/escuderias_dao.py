@@ -245,3 +245,23 @@ class Escuderias_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+    def obter_nome_escuderia(self, constructor_ref):
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT name FROM constructors WHERE constructor_ref = %s", (constructor_ref,))
+            resultado = cursor.fetchone()
+            cursor.close()
+
+            if resultado:
+                return {"nome_escuderia": resultado[0]}, None
+            return None, "Escuderia não encontrada"
+            
+        except Exception as erro:
+            print(f"Erro ao buscar nome da escuderia: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
