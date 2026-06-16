@@ -297,19 +297,30 @@ $$ LANGUAGE plpgsql STABLE;
 --     ORDER BY distancia_km ASC)
     --_Os índices utilizados aceleraram a consulta de ~10ms para ~0.2 ms, uma melhoria de 50x na performance
 
-    
----------------------------------------------------------------------------
--- Relatório 3 (Listar escuderias e relatório multinível)--
----------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
--- Relatório 3 (Listar escuderias e relatório multinível hierárquico) --
+-- Relatório 3 (Escuderias + relatório hierárquico de corridas) --
 ---------------------------------------------------------------------------
+
+--- Índices auxiliares ---
+--- Acelera a contagem de pilotos distintos por escuderia (JOIN results.constructor_id) ---
+DROP INDEX IF EXISTS idx_results_constructor_id;
+CREATE INDEX idx_results_constructor_id ON results (constructor_id);
+
+--- Acelera a filtragem e agrupamento de corridas por circuito ---
+DROP INDEX IF EXISTS idx_races_circuit_id;
+CREATE INDEX idx_races_circuit_id ON races (circuit_id);
+
+
+--- Parte A: escuderias cadastradas e quantidade de pilotos ---
+DROP FUNCTION IF EXISTS get_admin_report_constructors();
 CREATE OR REPLACE FUNCTION get_admin_report_constructors()
 RETURNS TABLE (constructor_name VARCHAR, driver_count BIGINT) AS $$
 BEGIN
     RETURN QUERY
-    SELECT c.name, COUNT(DISTINCT res.driver_id)
+    SELECT
+        c.name,
+        COUNT(DISTINCT res.driver_id)::BIGINT
     FROM constructors c
     LEFT JOIN results res ON c.id = res.constructor_id
     GROUP BY c.id, c.name
@@ -317,21 +328,35 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE;
 
+
+--- Parte B — Nível 1: total de corridas cadastradas ---
+DROP FUNCTION IF EXISTS get_admin_report_total_races();
+CREATE OR REPLACE FUNCTION get_admin_report_total_races()
+RETURNS TABLE (total_races BIGINT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT COUNT(*)::BIGINT FROM races;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+--- Parte B — Nível 2: corridas por circuito (mín., média e máx. de voltas nos resultados) ---
+DROP FUNCTION IF EXISTS get_admin_report_circuits();
 CREATE OR REPLACE FUNCTION get_admin_report_circuits()
 RETURNS TABLE (
-    circuit_id INT, 
-    circuit_name VARCHAR, 
-    race_count BIGINT, 
-    min_laps INT, 
-    avg_laps NUMERIC, 
+    circuit_id INT,
+    circuit_name TEXT,
+    race_count BIGINT,
+    min_laps INT,
+    avg_laps NUMERIC,
     max_laps INT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         c.id,
         c.name,
-        COUNT(DISTINCT r.id),
+        COUNT(DISTINCT r.id)::BIGINT,
         COALESCE(MIN(res.laps), 0)::INT,
         COALESCE(ROUND(AVG(res.laps), 2), 0)::NUMERIC,
         COALESCE(MAX(res.laps), 0)::INT
@@ -343,22 +368,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE;
 
+
+--- Parte B — Nível 3: detalhes de cada corrida em um circuito ---
+DROP FUNCTION IF EXISTS get_report_races_by_circuit(p_circuit_id INT);
 CREATE OR REPLACE FUNCTION get_report_races_by_circuit(p_circuit_id INT)
 RETURNS TABLE (
-    race_name VARCHAR, 
-    recorded_laps INT, 
+    race_name TEXT,
+    race_date DATE,
+    recorded_laps INT,
     participating_drivers BIGINT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         r.race_name,
+        r.race_date,
         COALESCE(MAX(res.laps), 0)::INT,
-        COUNT(DISTINCT res.driver_id)
+        COUNT(DISTINCT res.driver_id)::BIGINT
     FROM races r
     LEFT JOIN results res ON r.id = res.race_id
     WHERE r.circuit_id = p_circuit_id
-    GROUP BY r.id, r.race_name
-    ORDER BY r.race_name;
+    GROUP BY r.id, r.race_name, r.race_date
+    ORDER BY r.race_date NULLS LAST, r.race_name;
 END;
 $$ LANGUAGE plpgsql STABLE;
