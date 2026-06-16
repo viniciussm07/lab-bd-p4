@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Relatórios do Piloto | Sistema F1</title>
+    <title>Relatórios da Escuderia | Sistema F1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
@@ -40,8 +40,7 @@
           </div>
           <div class="flex items-center gap-4 text-right">
             <div>
-              <p class="nome-piloto font-bold"></p>
-              <p class="nome-escuderia text-sm text-zinc-300"></p>
+              <p class="nome-escuderia font-bold"></p>
             </div>
             <button
               onclick="realizarLogout()"
@@ -57,16 +56,16 @@
     <main class="flex-grow mx-auto max-w-7xl py-8 px-4 flex gap-8 w-full">
       <div class="w-1/4 flex flex-col gap-4">
         <button
-          onclick="carregarRelatorio6()"
+          onclick="carregarRelatorio4()"
           class="card text-left hover:bg-zinc-800 transition"
         >
-          Relatório 6: Pontos por Ano
+          Relatório 4: Pilotos por Vitórias
         </button>
         <button
-          onclick="carregarRelatorio7()"
+          onclick="carregarRelatorio5()"
           class="card text-left hover:bg-zinc-800 transition"
         >
-          Relatório 7: Status
+          Relatório 5: Status da Escuderia
         </button>
       </div>
 
@@ -97,15 +96,13 @@
     <script>
       const API_BASE_URL = "http://localhost:3001";
 
-      // Busca os dados do piloto logado pra montar o cabeçalho
+      // Busca os dados do usuário logado pra montar o header
       async function carregarPerfil() {
         try {
           const req = await fetch(`${API_BASE_URL}/api/me`, {
             credentials: "include",
           });
           const perfil = await req.json();
-          document.querySelector(".nome-piloto").innerText =
-            perfil.nome_piloto || "Piloto";
           document.querySelector(".nome-escuderia").innerText =
             perfil.nome_escuderia || "Escuderia";
         } catch (err) {
@@ -113,30 +110,28 @@
         }
       }
 
-      // Traz os pontos agregados por ano (Relatório 6)
-      async function carregarRelatorio6() {
+      // Busca a lista de pilotos e quantas vitórias cada um tem
+      async function carregarRelatorio4() {
         try {
           const req = await fetch(
-            `${API_BASE_URL}/api/piloto/relatorio-pontos-ano`,
+            `${API_BASE_URL}/api/escuderia/relatorio-pilotos-vitorias`,
             { credentials: "include" },
           );
           const data = await req.json();
           const tabela = document.querySelector(".report-table");
 
-          // Cabeçalho ajustado para Português
           tabela.innerHTML = `
               <tr>
-                  <th class="text-left py-2 border-b border-zinc-800">Ano</th>
-                  <th class="text-left py-2 border-b border-zinc-800">Pontos</th>
-                  <th class="text-left py-2 border-b border-zinc-800">Corridas</th>
+                  <th class="text-left py-2 border-b border-zinc-800">Piloto</th>
+                  <th class="text-left py-2 border-b border-zinc-800">Vitórias pela Escuderia</th>
               </tr>`;
 
           if (Array.isArray(data)) {
             data.forEach((item) => {
-              tabela.innerHTML += `<tr><td class="text-left py-3">${item.ano}</td><td class="text-left py-3">${item.total_pontos}</td><td class="text-left py-3">${item.corridas_pontuadas ? item.corridas_pontuadas : "-"}</td></tr>`;
+              tabela.innerHTML += `<tr><td class="text-left py-3">${item.nome_completo}</td><td class="text-left py-3">${item.quantidade_vitorias}</td></tr>`;
             });
           } else {
-            tabela.innerHTML += `<tr><td colspan="3" class="text-[--f1-text-highlight] py-4">${data.erro || "Nenhum dado retornado."}</td></tr>`;
+            tabela.innerHTML += `<tr><td colspan="2" class="text-[--f1-text-highlight] py-4">${data.erro || "Nenhum dado retornado."}</td></tr>`;
           }
         } catch (err) {
           document.querySelector(".report-table").innerHTML =
@@ -144,11 +139,11 @@
         }
       }
 
-      // Traz a contagem de status do piloto (Relatório 7)
-      async function carregarRelatorio7() {
+      // Conta o número de status (acidentes, quebras, etc) da escuderia
+      async function carregarRelatorio5() {
         try {
           const req = await fetch(
-            `${API_BASE_URL}/api/piloto/relatorio-contagem-status`,
+            `${API_BASE_URL}/api/escuderia/relatorio-contagem-status`,
             { credentials: "include" },
           );
           const data = await req.json();
@@ -173,7 +168,7 @@
         }
       }
 
-      // encerra a sessao e registra o logout no banco
+      // limpa a sessao no banco antes de mandar pro index
       async function realizarLogout() {
         try {
           const req = await fetch(`${API_BASE_URL}/api/logout`, {
