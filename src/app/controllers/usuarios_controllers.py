@@ -52,3 +52,18 @@ class UsuariosControllers:
             )
 
             return resposta, 200
+    def api_logout(self):
+        token = request.cookies.get('auth_token')
+        if token:
+            try:
+                payload = jwt.decode(token, "123456", algorithms=["HS256"])
+                # Conversão explícita para int, já que o "sub" foi salvo como string no login
+                userid = int(payload['sub']) 
+                usuario_dao = Usuarios_dao(connection_pool)
+                usuario_dao.registrar_log_logout(userid)
+            except Exception as e:
+                print(f"Erro ao registrar logout: {e}")
+
+        resposta = make_response(jsonify({"mensagem": "Logout realizado com sucesso"}))
+        resposta.set_cookie('auth_token', '', expires=0)
+        return resposta, 200
