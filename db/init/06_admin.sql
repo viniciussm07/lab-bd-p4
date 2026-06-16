@@ -203,7 +203,7 @@ $$ LANGUAGE plpgsql STABLE;
 ---------------------------------------------------------------------------
 --- Índices auxiliares ---
 --- Índice que acelera drasticamente a estratégia do bounding box ---
-DROP INDEX IF EXISTS idx_aiports_coordinates;
+DROP INDEX IF EXISTS idx_airports_coordinates;
 CREATE INDEX idx_airports_coordinates 
 ON airports (latitude_deg, longitude_deg);
 
@@ -301,3 +301,64 @@ $$ LANGUAGE plpgsql STABLE;
 ---------------------------------------------------------------------------
 -- Relatório 3 (Listar escuderias e relatório multinível)--
 ---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- Relatório 3 (Listar escuderias e relatório multinível hierárquico) --
+---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_admin_report_constructors()
+RETURNS TABLE (constructor_name VARCHAR, driver_count BIGINT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT c.name, COUNT(DISTINCT res.driver_id)
+    FROM constructors c
+    LEFT JOIN results res ON c.id = res.constructor_id
+    GROUP BY c.id, c.name
+    ORDER BY c.name;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+CREATE OR REPLACE FUNCTION get_admin_report_circuits()
+RETURNS TABLE (
+    circuit_id INT, 
+    circuit_name VARCHAR, 
+    race_count BIGINT, 
+    min_laps INT, 
+    avg_laps NUMERIC, 
+    max_laps INT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        c.id,
+        c.name,
+        COUNT(DISTINCT r.id),
+        COALESCE(MIN(res.laps), 0)::INT,
+        COALESCE(ROUND(AVG(res.laps), 2), 0)::NUMERIC,
+        COALESCE(MAX(res.laps), 0)::INT
+    FROM circuits c
+    JOIN races r ON c.id = r.circuit_id
+    LEFT JOIN results res ON r.id = res.race_id
+    GROUP BY c.id, c.name
+    ORDER BY c.name;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+CREATE OR REPLACE FUNCTION get_report_races_by_circuit(p_circuit_id INT)
+RETURNS TABLE (
+    race_name VARCHAR, 
+    recorded_laps INT, 
+    participating_drivers BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        r.race_name,
+        COALESCE(MAX(res.laps), 0)::INT,
+        COUNT(DISTINCT res.driver_id)
+    FROM races r
+    LEFT JOIN results res ON r.id = res.race_id
+    WHERE r.circuit_id = p_circuit_id
+    GROUP BY r.id, r.race_name
+    ORDER BY r.race_name;
+END;
+$$ LANGUAGE plpgsql STABLE;
