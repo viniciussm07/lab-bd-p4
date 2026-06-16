@@ -22,6 +22,10 @@ def rotas(aplicacao):
     @aplicacao.route('/api/login', methods=['POST'])
     def login():
         return usuario_cont.api_login()
+    
+    @aplicacao.route('/api/logout', methods=['POST'])
+    def logout():
+        return usuario_cont.api_logout()
         
     @aplicacao.route('/api/piloto/anos-atividade', methods=['GET'])
     @auth_middleware(tipo_permitido="Piloto")
@@ -116,12 +120,19 @@ def rotas(aplicacao):
     # Rotas comuns da API a todos os tipos de usuários
     @aplicacao.route('/api/me', methods=['GET'])
     @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
-    def obter_nome_escuderia_piloto(usuario_logado):
+    def obter_perfil_usuario(usuario_logado): # <-- NOME ATUALIZADO AQUI
         tipo = usuario_logado.get('tipo')
-        driver_ref = usuario_logado.get('id_original')
+        id_original = usuario_logado.get('id_original')
+        
         if tipo == 'Piloto':
-            return piloto_cont.api_obter_nome_escuderia_piloto(driver_ref)
-
+            return piloto_cont.api_obter_nome_escuderia_piloto(id_original)
+            
+        elif tipo == 'Escuderia':
+            return escuderia_cont.api_obter_nome_escuderia(id_original)
+            
+        elif tipo == 'Admin':
+            from flask import jsonify
+            return jsonify({"nome_escuderia": "Administrador do Sistema"}), 200
     # Views/Telas
     @aplicacao.route('/dashboard', methods=['GET'])
     @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
@@ -129,8 +140,22 @@ def rotas(aplicacao):
         tipo = usuario_logado.get('tipo')
         if tipo == 'Piloto':
             return render_template('dashboard_piloto.html')
-
+        if tipo == 'Escuderia':
+            return render_template('dashboard_escuderia.html')
+        
+    @aplicacao.route('/relatorios', methods=['GET'])
+    @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
+    def view_relatorios(usuario_logado):
+        tipo = usuario_logado.get('tipo')
+        if tipo == 'Piloto':
+            return render_template('relatorios_piloto.html')
     
+        if tipo == 'Escuderia':
+                return render_template('relatorios_escuderia.html')
+        
+    @aplicacao.route('/', methods=['GET'])
+    def view_login():
+        return render_template('login.html')
 
     
 
