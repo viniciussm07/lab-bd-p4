@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS USERS_LOG (
+    log_id SERIAL PRIMARY KEY,
+    userid INT NOT NULL,
+    tipo_acao TEXT,
+    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userid) REFERENCES USERS(userid)
+);

@@ -1,202 +1,182 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Acesso ao Sistema - Green Check</title>
+<!doctype html>
+<html lang="pt-BR" class="bg-zinc-950">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Sistema F1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --f1-bg: #15151e;
+        --f1-text-highlight: #e43834;
+      }
+      .card {
+        background-color: var(--f1-bg);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+    <nav class="bg-[--f1-bg]">
+      <div class="mx-auto max-w-7xl px-4">
+        <div class="flex h-16 items-center justify-center">
+          <div class="flex gap-2 items-center">
+            <div>
+              <img
+                src="/estatico/resources/icone-f1.png"
+                class="size-20"
+                alt="Logo F1"
+              />
+            </div>
+            <h1 class="font-bold text-xl">Sistema de Gerenciamento F1</h1>
+          </div>
+        </div>
+      </div>
+    </nav>
 
-<!-- Bootstrap -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <main
+      class="flex-grow mx-auto max-w-7xl py-16 px-4 w-full flex items-center justify-center"
+    >
+      <div class="card w-full max-w-md flex flex-col gap-6 p-8">
+        <h2
+          class="font-bold text-2xl text-center border-b border-zinc-800 pb-4"
+        >
+          Acesso ao Sistema
+        </h2>
 
-<!-- Font Awesome (iguais às outras telas) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <form
+          id="form-login"
+          class="flex flex-col gap-5"
+          onsubmit="realizarLogin(event)"
+        >
+          <div class="flex flex-col gap-2">
+            <label for="login" class="text-sm text-zinc-400 font-semibold"
+              >Usuário</label
+            >
+            <input
+              type="text"
+              id="login"
+              placeholder="Ex: admin, hamilton_d, mclaren_c"
+              class="bg-zinc-800 p-3 rounded outline-none focus:ring-1 focus:ring-[--f1-text-highlight] transition"
+              required
+            />
+          </div>
 
-<style>
-    body {
-        background-color: #E8F5E4; /* verde pastel claro */
-        font-family: Arial, Verdana, sans-serif;
-        padding-top: 90px; /* igual às outras telas */
-    }
+          <div class="flex flex-col gap-2">
+            <label for="password" class="text-sm text-zinc-400 font-semibold"
+              >Senha</label
+            >
+            <input
+              type="password"
+              id="password"
+              placeholder="Digite sua senha"
+              class="bg-zinc-800 p-3 rounded outline-none focus:ring-1 focus:ring-[--f1-text-highlight] transition"
+              required
+            />
+          </div>
 
-    h1 {
-        color: #3f6c45;
-        text-align: center;
-        margin-bottom: 40px;
-        font-weight: 600;
-    }
+          <div
+            id="mensagem-erro"
+            class="text-[--f1-text-highlight] text-sm hidden font-bold text-center"
+          ></div>
 
-    /* Navbar igual ao arquivo base */
-    .navbar {
-        background-color: #A8D5A2 !important;
-        border-bottom: 2px solid #8BCF8A;
-    }
+          <button
+            type="submit"
+            id="btn-submit"
+            class="bg-[--f1-text-highlight] font-bold px-4 py-3 rounded hover:brightness-110 transition mt-2"
+          >
+            Entrar
+          </button>
+        </form>
+      </div>
+    </main>
 
-    .navbar-brand, .nav-link {
-        color: #2d4b31 !important;
-        font-weight: bold;
-    }
+    <footer class="border-t border-zinc-800 py-6">
+      <div
+        class="mx-auto max-w-7xl px-4 text-center text-zinc-500 sm:px-6 lg:px-8"
+      >
+        <p>Desenvolvido por:</p>
+        <ul>
+          <li>Cleverson Cristian Oliveira Sousa</li>
+          <li>Vinicius Soares Martin</li>
+          <li>Caio Delgado Pires</li>
+        </ul>
+      </div>
+    </footer>
 
-    .nav-link:hover {
-        color: #1f351f !important;
-    }
+    <script>
+      const API_BASE_URL = "http://localhost:3000";
 
-    .nav-link.active {
-        color: #6b8b6f !important;
-        opacity: 0.7;
-    }
-
-    /* Card do formulário (igual ao estilo das telas de inclusão/edição) */
-    .form-card {
-        max-width: 450px;
-        margin: auto;
-        background: #F4FBF2;
-        padding: 30px 35px;
-        border-radius: 12px;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.12);
-    }
-
-    label {
-        font-weight: 600;
-        color: #2d4b31;
-    }
-
-    input {
-        border-radius: 6px !important;
-        border: 1px solid #8BCF8A !important;
-        background-color: white !important;
-    }
-
-    input:focus {
-        border-color: #5cbf60 !important;
-        box-shadow: 0 0 4px rgba(92, 191, 96, 0.5) !important;
-    }
-
-    .btn-success {
-        background-color: #8BCF8A;
-        border-color: #76b976;
-        font-weight: bold;
-        padding: 10px;
-        border-radius: 8px;
-        width: 100%;
-    }
-
-    .btn-success:hover {
-        background-color: #75c576;
-        border-color: #5ea95e;
-    }
-
-</style>
-</head>
-
-<body>
-
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-light fixed-top">
-  <a class="navbar-brand" href="#">Green Check 🌿</a>
-
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-
-  <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-    <ul class="navbar-nav">
-      {% if session.usuario_logado %}
-      <li class="nav-item">
-          <a class="nav-link" href="/arvores">Listagem de Árvores</a>
-      </li>
-
-      <li class="nav-item">
-          <a class="nav-link" href="/inclusaoArvores">Cadastro de Árvore</a>
-      </li>
-
-      <li class="nav-item">
-          <a class="nav-link" href="/inclusaoEspecies">Cadastro de Espécie</a>
-      </li>
-
-      <li class="nav-item">
-          <a class="nav-link" href="/consulta">Consulta</a>
-      </li>
-
-      <li class="nav-item">
-          <a class="nav-link text-danger" href="/logout">Sair</a>
-      </li>
-      {% endif %}
-      {% if not session.usuario_logado %}
-      <li class="nav-item">
-          <a class="nav-link" href="/">Acesso</a>
-      </li>
-      {% endif %}
-    </ul>
-  </div>
-</nav>
-
-
-<!-- TÍTULO -->
-<h1>Acesso ao Sistema</h1>
-
-
-<!-- CARD DO FORMULÁRIO -->
-<div class="form-card">
-
-<form action="/validaBDUsuarios" method="post">
-
-    <input type="hidden" id="id" name="id" />
-
-    <div class="form-group">
-        <label for="login">Login:</label>
-        <input class="form-control" type="text" id="login" name="login">
-    </div>
-
-    <div class="form-group">
-        <label for="senha">Senha:</label>
-        <input class="form-control" type="password" id="senha" name="senha">
-    </div>
-
-    <button type="submit" class="btn btn-success">Validar Acesso</button>
-
-</form>
-
-</div>
-
-
-<!-- SCRIPTS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-
-<script>
-    // Destacar o link da página atual
-    (function() {
-        const currentPath = window.location.pathname;
-        const navLinks = document.querySelectorAll('.nav-link');
-        
-        navLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            if (href && (currentPath === href || currentPath.startsWith(href + '/'))) {
-                link.classList.add('active');
-            }
-        });
-    })();
-
-    document.querySelector("form").addEventListener("submit", function(event) {
-        const email = document.getElementById("login").value.trim();
-        const senha = document.getElementById("senha").value;
-
-        // Regex simples para validar email
-        const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-        if (!emailValido) {
-            event.preventDefault();
-            alert("Por favor, digite um email válido.");
-            return;
+      /* *
+       * O evento "pageshow" abaixo foi implementado para corrigir um comportamento nativo do BFCache (Back/Forward Cache) dos navegadores.
+       * Durante os testes, notamos que se o usuário fizesse login com sucesso e depois clicasse no botão "Voltar" do navegador,
+       * a página de login era restaurada da memória RAM com o botão ainda desativado (disabled=true) e preso no estado "Verificando...".
+       * A propriedade "event.persisted" detecta se a página foi carregada do cache e restaura o estado inicial da interface.
+       */
+      window.addEventListener("pageshow", function (event) {
+        if (event.persisted) {
+          const btnSubmit = document.getElementById("btn-submit");
+          btnSubmit.innerText = "Entrar";
+          btnSubmit.disabled = false;
+          document.getElementById("mensagem-erro").classList.add("hidden");
         }
+      });
 
-        if (senha.length < 8) {
-            event.preventDefault();
-            alert("A senha deve ter pelo menos 8 caracteres.");
-            return;
+      async function realizarLogin(event) {
+        event.preventDefault(); // Impede o envio tradicional do formulário (recarregamento da página)
+
+        const loginInput = document.getElementById("login").value;
+        const passwordInput = document.getElementById("password").value;
+        const divErro = document.getElementById("mensagem-erro");
+        const btnSubmit = document.getElementById("btn-submit");
+
+        // Feedback visual e bloqueio de múltiplos cliques durante a requisição assíncrona
+        divErro.classList.add("hidden");
+        divErro.innerText = "";
+        btnSubmit.innerText = "Verificando...";
+        btnSubmit.disabled = true;
+
+        try {
+          const req = await fetch(`${API_BASE_URL}/api/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              login: loginInput,
+              password: passwordInput,
+            }),
+            credentials: "include", // Propriedade essencial para permitir a troca do cookie HTTPOnly (JWT) com a API
+          });
+
+          const data = await req.json();
+
+          if (req.ok) {
+            // Restaura o botão antes de sair da página para garantir o estado correto caso o BFCache seja acionado
+            btnSubmit.innerText = "Entrar";
+            btnSubmit.disabled = false;
+
+            // O cookie JWT já foi definido pelo backend, basta redirecionar para o dashboard
+            window.location.href = "/dashboard";
+          } else {
+            // Exibe as mensagens de erro tratadas pela camada DAO (ex: credenciais inválidas)
+            divErro.innerText = data.erro || "Credenciais inválidas.";
+            divErro.classList.remove("hidden");
+            btnSubmit.innerText = "Entrar";
+            btnSubmit.disabled = false;
+          }
+        } catch (err) {
+          divErro.innerText = "Erro na comunicação com a API.";
+          divErro.classList.remove("hidden");
+          btnSubmit.innerText = "Entrar";
+          btnSubmit.disabled = false;
         }
-    });
-</script>
-
-
-</body>
+      }
+    </script>
+  </body>
 </html>
