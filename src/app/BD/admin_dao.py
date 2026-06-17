@@ -280,3 +280,88 @@ class Admin_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+
+    def cadastrar_escuderia(self, constructor_ref, name, country_id, wikipedia_url):
+        sql = """
+            INSERT INTO constructors (constructor_ref, name, country_id, wikipedia_url)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id, constructor_ref, name, country_id, wikipedia_url
+        """
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(
+                sql,
+                (constructor_ref, name, country_id, wikipedia_url or None),
+            )
+            linha = cursor.fetchone()
+            conn.commit()
+            cursor.close()
+
+            return {
+                "mensagem": "Escuderia cadastrada com sucesso.",
+                "escuderia": {
+                    "id": linha[0],
+                    "constructor_ref": linha[1],
+                    "name": linha[2],
+                    "country_id": linha[3],
+                    "wikipedia_url": linha[4],
+                    "login_gerado": f"{linha[1]}_c",
+                },
+            }, None
+
+        except Exception as erro:
+            if conn:
+                conn.rollback()
+            print(f"Erro ao cadastrar escuderia: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
+
+    def cadastrar_piloto(self, driver_ref, given_name, family_name, date_of_birth, country_id):
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(
+                "CALL inserir_piloto_arquivo(%s, %s, %s, %s, %s)",
+                (driver_ref, given_name, family_name, date_of_birth, country_id),
+            )
+            cursor.execute(
+                """
+                SELECT id, driver_ref, given_name, family_name, date_of_birth, country_id
+                FROM drivers
+                WHERE driver_ref = %s
+                """,
+                (driver_ref,),
+            )
+            linha = cursor.fetchone()
+            conn.commit()
+            cursor.close()
+
+            if not linha:
+                return None, "Piloto inserido, mas não foi possível recuperar os dados."
+
+            return {
+                "mensagem": "Piloto cadastrado com sucesso.",
+                "piloto": {
+                    "id": linha[0],
+                    "driver_ref": linha[1],
+                    "given_name": linha[2],
+                    "family_name": linha[3],
+                    "date_of_birth": linha[4].strftime("%Y-%m-%d") if linha[4] else None,
+                    "country_id": linha[5],
+                    "login_gerado": f"{linha[1]}_d",
+                },
+            }, None
+
+        except Exception as erro:
+            if conn:
+                conn.rollback()
+            print(f"Erro ao cadastrar piloto: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)

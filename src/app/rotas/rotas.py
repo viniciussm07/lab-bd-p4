@@ -152,6 +152,16 @@ def rotas(aplicacao):
     def obter_relatorio_corridas_circuito_admin(usuario_logado, circuit_id):
         return admin_cont.api_obter_relatorio_corridas_por_circuito(circuit_id)
 
+    @aplicacao.route('/api/admin/escuderias', methods=['POST'])
+    @auth_middleware(tipo_permitido="Admin")
+    def cadastrar_escuderia_admin(usuario_logado):
+        return admin_cont.api_cadastrar_escuderia()
+
+    @aplicacao.route('/api/admin/pilotos', methods=['POST'])
+    @auth_middleware(tipo_permitido="Admin")
+    def cadastrar_piloto_admin(usuario_logado):
+        return admin_cont.api_cadastrar_piloto()
+
     # --- Perfil Comum ---
     @aplicacao.route('/api/me', methods=['GET'])
     @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
