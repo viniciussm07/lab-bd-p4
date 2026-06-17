@@ -19,6 +19,44 @@
         border-radius: 1rem;
         padding: 1rem;
       }
+      .collapsible-header {
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .collapsible-header .chevron {
+        transition: transform 0.2s ease;
+        color: var(--f1-text-highlight);
+        font-size: 0.875rem;
+        flex-shrink: 0;
+      }
+      .collapsible-header.collapsed .chevron {
+        transform: rotate(-90deg);
+      }
+      .collapsible-body.collapsed {
+        display: none;
+      }
+      .collapsible-body {
+        margin-top: 0.75rem;
+      }
+      .menu-item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.15s;
+      }
+      .menu-item:hover {
+        background-color: rgb(39 39 42);
+      }
+      .menu-item.active {
+        background-color: rgb(63 63 70);
+        font-weight: 600;
+      }
     </style>
   </head>
   <body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -55,18 +93,64 @@
 
     <main class="flex-grow mx-auto max-w-7xl py-8 px-4 flex gap-8 w-full">
       <div class="w-1/4 flex flex-col gap-4">
-        <button
-          onclick="carregarRelatorio4()"
-          class="card text-left hover:bg-zinc-800 transition"
-        >
-          Relatório 4: Pilotos por Vitórias
-        </button>
-        <button
-          onclick="carregarRelatorio5()"
-          class="card text-left hover:bg-zinc-800 transition"
-        >
-          Relatório 5: Status da Escuderia
-        </button>
+        <div class="card">
+          <div class="collapsible-header font-bold" onclick="alternarSecao(this)">
+            <span>Navegação</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="collapsible-body flex flex-col gap-1">
+            <a href="/dashboard" class="menu-item">Dashboard Escuderia</a>
+            <span class="menu-item active">Relatórios Escuderia</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="collapsible-header font-bold" onclick="alternarSecao(this)">
+            <span>Relatórios disponíveis</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="collapsible-body flex flex-col gap-2">
+            <button onclick="carregarRelatorio4()" class="menu-item">
+              Relatório 4: Pilotos por Vitórias
+            </button>
+            <button onclick="carregarRelatorio5()" class="menu-item">
+              Relatório 5: Status da Escuderia
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div
+            class="collapsible-header font-bold collapsed"
+            onclick="alternarSecao(this)"
+          >
+            <span>Opções do sistema (todos os perfis)</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="collapsible-body collapsed text-sm text-zinc-400 flex flex-col gap-3">
+            <div>
+              <p class="text-zinc-200 font-semibold mb-1">Admin</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Dashboard: resumo, corridas, rankings</li>
+                <li>Relatórios 1, 2 e 3</li>
+              </ul>
+            </div>
+            <div>
+              <p class="text-zinc-200 font-semibold mb-1">Escuderia</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Dashboard: vitórias, pilotos, busca e CSV</li>
+                <li>Relatórios 4 e 5</li>
+              </ul>
+            </div>
+            <div>
+              <p class="text-zinc-200 font-semibold mb-1">Piloto</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Dashboard: anos e estatísticas</li>
+                <li>Relatórios 6 e 7</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="w-3/4 card">
@@ -95,6 +179,11 @@
 
     <script>
       const API_BASE_URL = "http://localhost:3000";
+
+      function alternarSecao(header) {
+        header.classList.toggle("collapsed");
+        header.nextElementSibling.classList.toggle("collapsed");
+      }
 
       // Busca os dados do usuário logado pra montar o header
       async function carregarPerfil() {
