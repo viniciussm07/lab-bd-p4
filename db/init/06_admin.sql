@@ -122,6 +122,7 @@ $$ LANGUAGE plpgsql STABLE;
 
 
 --- Ranking dos construtores da última temporada ---
+--- Esta função funciona bem, porém a tabela de results não possui dados atualizados, o que faz retornar poucos pontos na season mais atual (2025)---
 CREATE OR REPLACE FUNCTION get_latest_constructor_standings()
 RETURNS TABLE(constructor_name VARCHAR, total_points NUMERIC) AS $$
 BEGIN
@@ -139,6 +140,39 @@ BEGIN
     WHERE s.year = (SELECT ultimo_ano FROM max_season)
     GROUP BY c.id, c.name
     ORDER BY SUM(res.points) DESC;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+--- Ranking dos construtores da última temporada (via constructor_standings) ---
+CREATE OR REPLACE FUNCTION get_latest_constructor_standings_from_standings()
+RETURNS TABLE(constructor_name VARCHAR, total_points NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    WITH ultima_temporada AS (
+        SELECT id FROM seasons ORDER BY year DESC LIMIT 1
+    ),
+    ultima_rodada_por_escuderia AS (
+        SELECT
+            cs.constructor_id,
+            MAX(st.round) AS round
+        FROM constructor_standings cs
+        JOIN standings st ON st.id = cs.standing_id
+        WHERE st.season_id = (SELECT id FROM ultima_temporada)
+        GROUP BY cs.constructor_id
+    )
+    SELECT
+        c.name::VARCHAR,
+        st.points::NUMERIC
+    FROM ultima_rodada_por_escuderia ur
+    JOIN constructor_standings cs
+        ON cs.constructor_id = ur.constructor_id
+    JOIN standings st
+        ON st.id = cs.standing_id
+        AND st.round = ur.round
+        AND st.season_id = (SELECT id FROM ultima_temporada)
+    JOIN constructors c ON c.id = cs.constructor_id
+    ORDER BY st.points DESC;
 END;
 $$ LANGUAGE plpgsql STABLE;
 
