@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="pt-BR" class="bg-zinc-950">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatórios do Administrador | Sistema F1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --f1-bg: #15151e;
+        --f1-text-highlight: #e43834;
+      }
+      .card {
+        background-color: var(--f1-bg);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+      .collapsible-header {
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .collapsible-header .collapse-icon {
+        transition: transform 0.2s ease;
+        color: var(--f1-text-highlight);
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+      }
+      .collapsible-header.collapsed .collapse-icon {
+        transform: rotate(-90deg);
+      }
+      .collapsible-body.collapsed {
+        display: none;
+      }
+      .collapsible-body {
+        margin-top: 0.75rem;
+      }
+      .menu-item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.15s;
+      }
+      .menu-item:hover {
+        background-color: rgb(39 39 42);
+      }
+      .menu-item.active {
+        background-color: rgb(63 63 70);
+        font-weight: 600;
+      }
+      .circuito-grupo {
+        border: 1px solid rgb(39 39 42);
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+      }
+      .circuito-grupo .collapsible-header {
+        padding: 0.75rem 1rem;
+        background-color: rgb(24 24 27);
+      }
+      .circuito-grupo .collapsible-header:hover {
+        background-color: rgb(39 39 42);
+      }
+      .circuito-grupo .collapsible-body {
+        margin-top: 0;
+        padding: 0.75rem 1rem 1rem;
+        border-top: 1px solid rgb(39 39 42);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+    <nav class="bg-[--f1-bg]">
+      <div class="mx-auto max-w-7xl px-4">
+        <div class="flex h-16 items-center justify-between">
+          <div class="flex gap-2 items-center">
+            <div>
+              <img src="/estatico/resources/icone-f1.png" class="size-20" alt="Logo F1" />
+            </div>
+            <div class="flex">
+              <a href="/dashboard" class="px-2 py-1">Dashboard</a>
+              <a
+                href="/relatorios"
+                class="px-2 py-1 font-bold text-[--f1-text-highlight]"
+                >Relatórios</a
+              >
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div>
+              <p class="nome-admin font-bold"></p>
+              <p class="text-sm text-[--f1-text-highlight] font-semibold">Administrador</p>
+            </div>
+            <button
+              onclick="realizarLogout()"
+              class="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold px-3 py-1.5 rounded transition"
+            >
+              Sair
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="flex-grow mx-auto max-w-7xl py-8 px-4 flex gap-8 w-full">
+      <div class="w-1/4 flex flex-col gap-4">
+        <div class="card">
+          <div class="collapsible-header font-bold" onclick="alternarSecao(this)">
+            <span>Relatórios disponíveis</span>
+            <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </div>
+          <div class="collapsible-body flex flex-col gap-2">
+            <button
+              onclick="carregarRelatorio1()"
+              class="menu-item"
+            >
+              Relatório 1: Status dos Resultados
+            </button>
+            <button
+              onclick="mostrarFormularioRelatorio2()"
+              class="menu-item"
+            >
+              Relatório 2: Aeroportos por Cidade
+            </button>
+            <button
+              onclick="carregarRelatorio3()"
+              class="menu-item"
+            >
+              Relatório 3: Escuderias e Corridas
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div
+            class="collapsible-header font-bold collapsed"
+            onclick="alternarSecao(this)"
+          >
+            <span>Opções do sistema (todos os perfis)</span>
+            <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </div>
+          <div class="collapsible-body collapsed text-sm text-zinc-400 flex flex-col gap-3">
+            <div>
+              <p class="text-zinc-200 font-semibold mb-1">Admin</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Dashboard: resumo, corridas, rankings</li>
+                <li>Relatórios 1, 2 e 3</li>
+              </ul>
+            </div>
+            <div>
+              <p class="text-zinc-200 font-semibold mb-1">Escuderia</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Dashboard: vitórias, pilotos, busca e CSV</li>
+                <li>Relatórios 4 e 5</li>
+              </ul>
+            </div>
+            <div>
+              <p class="text-zinc-200 font-semibold mb-1">Piloto</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Dashboard: anos e estatísticas</li>
+                <li>Relatórios 6 e 7</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-3/4 flex flex-col gap-4">
+        <div id="form-relatorio-2" class="card hidden flex flex-col gap-3">
+          <h2 class="font-bold text-lg border-b border-zinc-800 pb-2">
+            Buscar aeroportos próximos (Brasil)
+          </h2>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="input-cidade"
+              placeholder="Ex: Rio de Janeiro"
+              class="bg-zinc-800 p-2 rounded flex-grow outline-none focus:ring-1 focus:ring-[--f1-text-highlight]"
+            />
+            <button
+              onclick="carregarRelatorio2()"
+              class="bg-[--f1-text-highlight] font-bold px-4 py-2 rounded hover:brightness-110 transition"
+            >
+              Buscar
+            </button>
+          </div>
+        </div>
+
+        <div class="card overflow-x-auto">
+          <div id="report-area">
+            <table class="w-full border-separate border-spacing-x-2 report-table">
+              <tr>
+                <td class="text-zinc-500 text-center py-8">
+                  Selecione um relatório ao lado.
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="border-t border-zinc-800 py-6">
+      <div
+        class="mx-auto max-w-7xl px-4 text-center text-zinc-500 sm:px-6 lg:px-8"
+      >
+        <p>Desenvolvido por:</p>
+        <ul>
+          <li>Cleverson Cristian Oliveira Sousa</li>
+          <li>Vinicius Soares Martin</li>
+          <li>Caio Delgado Pires</li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      const API_BASE_URL = "http://localhost:3000";
+
+      function alternarSecao(header) {
+        header.classList.toggle("collapsed");
+        header.nextElementSibling.classList.toggle("collapsed");
+      }
+
+      function definirConteudo(html) {
+        document.getElementById("report-area").innerHTML = html;
+      }
+
+      function definirTabela(html) {
+        definirConteudo(
+          `<table class="w-full border-separate border-spacing-x-2 report-table">${html}</table>`,
+        );
+      }
+
+      async function carregarPerfil() {
+        try {
+          const req = await fetch(`${API_BASE_URL}/api/me`, {
+            credentials: "include",
+          });
+          const perfil = await req.json();
+          document.querySelector(".nome-admin").innerText =
+            perfil.nome_escuderia || "Administrador do Sistema";
+        } catch (err) {
+          console.error("Falha ao buscar perfil:", err);
+        }
+      }
+
+      function mostrarFormularioRelatorio2() {
+        document.getElementById("form-relatorio-2").classList.remove("hidden");
+        definirTabela(
+          `<tr><td class="text-zinc-500 text-center py-8">Informe uma cidade brasileira e clique em Buscar.</td></tr>`,
+        );
+      }
+
+      async function carregarRelatorio1() {
+        document.getElementById("form-relatorio-2").classList.add("hidden");
+        try {
+          const req = await fetch(
+            `${API_BASE_URL}/api/admin/relatorio-contagem-status`,
+            { credentials: "include" },
+          );
+          const data = await req.json();
+
+          let html = `
+            <tr>
+              <th class="text-left py-2 border-b border-zinc-800">Status</th>
+              <th class="text-left py-2 border-b border-zinc-800">Contagem</th>
+            </tr>`;
+
+          if (Array.isArray(data) && data.length) {
+            data.forEach((item) => {
+              html += `<tr><td class="text-left py-3">${item.status}</td><td class="text-left py-3">${item.contagem}</td></tr>`;
+            });
+          } else {
+            html += `<tr><td colspan="2" class="text-[--f1-text-highlight] py-4">${data.erro || "Nenhum dado retornado."}</td></tr>`;
+          }
+
+          definirTabela(html);
+        } catch (err) {
+          definirTabela(
+            `<tr><td class="text-[--f1-text-highlight] py-4">Erro na requisição do relatório.</td></tr>`,
+          );
+        }
+      }
+
+      async function carregarRelatorio2() {
+        const cidade = document.getElementById("input-cidade").value.trim();
+        if (!cidade) return;
+
+        try {
+          const req = await fetch(
+            `${API_BASE_URL}/api/admin/relatorio-aeroportos?cidade=${encodeURIComponent(cidade)}`,
+            { credentials: "include" },
+          );
+          const data = await req.json();
+
+          let html = `
+            <tr>
+              <th class="text-left py-2 border-b border-zinc-800">Cidade</th>
+              <th class="text-left py-2 border-b border-zinc-800">IATA</th>
+              <th class="text-left py-2 border-b border-zinc-800">Aeroporto</th>
+              <th class="text-left py-2 border-b border-zinc-800">Cidade do aeroporto</th>
+              <th class="text-left py-2 border-b border-zinc-800">Distância (km)</th>
+              <th class="text-left py-2 border-b border-zinc-800">Tipo</th>
+            </tr>`;
+
+          if (Array.isArray(data) && data.length) {
+            data.forEach((item) => {
+              html += `<tr>
+                <td class="text-left py-3">${item.cidade_pesquisada}</td>
+                <td class="text-left py-3">${item.codigo_iata || "-"}</td>
+                <td class="text-left py-3">${item.nome_aeroporto}</td>
+                <td class="text-left py-3">${item.cidade_aeroporto || "-"}</td>
+                <td class="text-left py-3">${item.distancia_km}</td>
+                <td class="text-left py-3">${item.tipo_aeroporto}</td>
+              </tr>`;
+            });
+          } else {
+            html += `<tr><td colspan="6" class="text-[--f1-text-highlight] py-4">${data.erro || "Nenhum aeroporto encontrado para esta cidade."}</td></tr>`;
+          }
+
+          definirTabela(html);
+        } catch (err) {
+          definirTabela(
+            `<tr><td class="text-[--f1-text-highlight] py-4">Erro na requisição do relatório.</td></tr>`,
+          );
+        }
+      }
+
+      async function carregarDetalhesCircuito(circuitId, container) {
+        const body = container.querySelector(".circuito-detalhes");
+        if (body.dataset.loaded === "true") {
+          alternarSecao(container.querySelector(".collapsible-header"));
+          return;
+        }
+
+        body.innerHTML = "<p class='text-zinc-500 text-sm'>Carregando...</p>";
+        alternarSecao(container.querySelector(".collapsible-header"));
+
+        try {
+          const req = await fetch(
+            `${API_BASE_URL}/api/admin/relatorio-corridas/circuito/${circuitId}`,
+            { credentials: "include" },
+          );
+          const data = await req.json();
+
+          let html = `
+            <table class="w-full border-separate border-spacing-x-2 text-sm">
+              <tr>
+                <th class="text-left py-2 border-b border-zinc-800">Corrida</th>
+                <th class="text-left py-2 border-b border-zinc-800">Data</th>
+                <th class="text-left py-2 border-b border-zinc-800">Voltas</th>
+                <th class="text-left py-2 border-b border-zinc-800">Pilotos</th>
+              </tr>`;
+
+          if (Array.isArray(data) && data.length) {
+            data.forEach((item) => {
+              html += `<tr>
+                <td class="text-left py-2">${item.nome_corrida}</td>
+                <td class="text-left py-2">${item.data || "-"}</td>
+                <td class="text-left py-2">${item.voltas_registradas}</td>
+                <td class="text-left py-2">${item.pilotos_participantes}</td>
+              </tr>`;
+            });
+          } else {
+            html += `<tr><td colspan="4" class="text-zinc-500 py-3">Nenhuma corrida neste circuito.</td></tr>`;
+          }
+
+          html += `</table>`;
+          body.innerHTML = html;
+          body.dataset.loaded = "true";
+        } catch (err) {
+          body.innerHTML =
+            "<p class='text-[--f1-text-highlight] text-sm'>Erro ao carregar detalhes.</p>";
+        }
+      }
+
+      function montarGrupoCircuito(item) {
+        const grupo = document.createElement("div");
+        grupo.className = "circuito-grupo";
+        grupo.innerHTML = `
+          <div class="collapsible-header collapsed" data-id="${item.circuito_id}">
+            <span>${item.nome_circuito} — ${item.quantidade_corridas} corrida(s)</span>
+            <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </div>
+          <div class="collapsible-body circuito-detalhes collapsed"></div>
+        `;
+        grupo.querySelector(".collapsible-header").addEventListener("click", () => {
+          carregarDetalhesCircuito(item.circuito_id, grupo);
+        });
+        return grupo;
+      }
+
+      async function carregarRelatorio3() {
+        document.getElementById("form-relatorio-2").classList.add("hidden");
+
+        try {
+          const [reqEscuderias, reqTotal, reqCircuitos] = await Promise.all([
+            fetch(`${API_BASE_URL}/api/admin/relatorio-escuderias`, {
+              credentials: "include",
+            }),
+            fetch(`${API_BASE_URL}/api/admin/relatorio-corridas/total`, {
+              credentials: "include",
+            }),
+            fetch(`${API_BASE_URL}/api/admin/relatorio-corridas/circuitos`, {
+              credentials: "include",
+            }),
+          ]);
+
+          const escuderias = await reqEscuderias.json();
+          const total = await reqTotal.json();
+          const circuitos = await reqCircuitos.json();
+
+          let escuderiasRows = "";
+          if (Array.isArray(escuderias)) {
+            escuderias.forEach((item) => {
+              escuderiasRows += `<tr><td class="text-left py-3">${item.nome_escuderia}</td><td class="text-left py-3">${item.quantidade_pilotos}</td></tr>`;
+            });
+          }
+
+          definirConteudo(`
+            <div class="flex flex-col gap-4">
+              <div class="card !p-0 overflow-hidden">
+                <div class="collapsible-header font-bold p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
+                  <span>Escuderias cadastradas (${Array.isArray(escuderias) ? escuderias.length : 0})</span>
+                  <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="collapsible-body p-4">
+                  <table class="w-full border-separate border-spacing-x-2">
+                    <tr>
+                      <th class="text-left py-2 border-b border-zinc-800">Escuderia</th>
+                      <th class="text-left py-2 border-b border-zinc-800">Qtd. de pilotos</th>
+                    </tr>
+                    ${escuderiasRows}
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="collapsible-header font-bold" onclick="alternarSecao(this)">
+                  <span>Nível 1 — Total de corridas cadastradas</span>
+                  <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="collapsible-body">
+                  <p class="text-3xl font-bold text-[--f1-text-highlight]">${total.total_corridas ?? 0}</p>
+                </div>
+              </div>
+
+              <div class="card !p-0 overflow-hidden">
+                <div class="collapsible-header font-bold p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
+                  <span>Nível 2 e 3 — Corridas por circuito (${Array.isArray(circuitos) ? circuitos.length : 0})</span>
+                  <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="collapsible-body p-4">
+                  <p class="text-sm text-zinc-400 mb-3">Clique em um circuito para expandir o nível 3 (corridas e pilotos).</p>
+                  <div id="lista-circuitos" class="flex flex-col gap-2"></div>
+                </div>
+              </div>
+            </div>
+          `);
+
+          const lista = document.getElementById("lista-circuitos");
+          if (Array.isArray(circuitos) && lista) {
+            circuitos.forEach((item) => {
+              lista.appendChild(montarGrupoCircuito(item));
+            });
+          }
+        } catch (err) {
+          definirTabela(
+            `<tr><td class="text-[--f1-text-highlight] py-4">Erro na requisição do relatório.</td></tr>`,
+          );
+        }
+      }
+
+      async function realizarLogout() {
+        try {
+          const req = await fetch(`${API_BASE_URL}/api/logout`, {
+            method: "POST",
+            credentials: "include",
+          });
+          if (req.ok) {
+            window.location.href = "/";
+          }
+        } catch (err) {
+          console.error("Erro na requisição de logout:", err);
+        }
+      }
+
+      carregarPerfil();
+    </script>
+  </body>
+</html>

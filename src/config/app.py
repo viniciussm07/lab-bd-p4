@@ -19,6 +19,11 @@ CORS(aplicacao)
 # Configuração para processar dados de formulários
 aplicacao.config['SECRET_KEY'] = 'sua-chave-secreta-aqui'
 
+# Em desenvolvimento (volume montado no Docker), recarrega templates sem reiniciar
+aplicacao.config['TEMPLATES_AUTO_RELOAD'] = (
+    os.getenv('TEMPLATES_AUTO_RELOAD', 'true').lower() == 'true'
+)
+
 # Importar rotas - precisa ser feito depois de criar a aplicação
 from src.app.rotas import rotas
 rotas(aplicacao)

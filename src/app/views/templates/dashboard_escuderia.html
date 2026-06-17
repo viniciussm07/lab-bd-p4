@@ -19,6 +19,28 @@
         border-radius: 1rem;
         padding: 1rem;
       }
+      .collapsible-header {
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .collapsible-header .chevron {
+        transition: transform 0.2s ease;
+        color: var(--f1-text-highlight);
+        font-size: 0.875rem;
+      }
+      .collapsible-header.collapsed .chevron {
+        transform: rotate(-90deg);
+      }
+      .collapsible-body {
+        margin-top: 1rem;
+      }
+      .collapsible-body.collapsed {
+        display: none;
+      }
     </style>
   </head>
   <body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -82,9 +104,14 @@
 
       <div class="grid grid-cols-2 gap-8">
         <div class="card flex flex-col gap-4">
-          <h2 class="font-bold text-lg border-b border-zinc-800 pb-2">
-            Consultar Piloto por Sobrenome
-          </h2>
+          <div
+            class="collapsible-header font-bold text-lg border-b border-zinc-800 pb-2"
+            onclick="alternarSecao(this)"
+          >
+            <span>Consultar Piloto por Sobrenome</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="collapsible-body flex flex-col gap-4">
           <div class="flex gap-2">
             <input
               type="text"
@@ -105,12 +132,18 @@
           >
             <p class="text-zinc-500">Os resultados aparecerão aqui.</p>
           </div>
+          </div>
         </div>
 
         <div class="card flex flex-col gap-4">
-          <h2 class="font-bold text-lg border-b border-zinc-800 pb-2">
-            Inserir Pilotos via Arquivo (CSV)
-          </h2>
+          <div
+            class="collapsible-header font-bold text-lg border-b border-zinc-800 pb-2"
+            onclick="alternarSecao(this)"
+          >
+            <span>Inserir Pilotos via Arquivo (CSV)</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="collapsible-body flex flex-col gap-4">
           <div class="flex gap-2 items-center">
             <input
               type="file"
@@ -134,6 +167,7 @@
               family_name, date_of_birth, country_id
             </p>
           </div>
+          </div>
         </div>
       </div>
     </main>
@@ -153,6 +187,11 @@
 
     <script>
       const API_BASE_URL = "http://localhost:3000";
+
+      function alternarSecao(header) {
+        header.classList.toggle("collapsed");
+        header.nextElementSibling.classList.toggle("collapsed");
+      }
 
       async function carregarDashboardEscuderia() {
         try {
