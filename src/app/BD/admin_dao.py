@@ -117,3 +117,166 @@ class Admin_dao:
         finally:
             if conn:
                 self._db_pool.putconn(conn)
+
+    def obter_relatorio_contagem_status(self):
+        sql = "SELECT status, count FROM get_result_status_counts()"
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            resultados = cursor.fetchall()
+            cursor.close()
+
+            return [
+                {"status": linha[0], "contagem": linha[1]}
+                for linha in resultados
+            ], None
+
+        except Exception as erro:
+            print(f"Erro ao buscar relatório de status: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
+
+    def obter_relatorio_aeroportos(self, cidade):
+        sql = (
+            "SELECT cidade_pesquisada, codigo_iata, nome_aeroporto, cidade_aeroporto, "
+            "distancia_km, tipo_aeroporto FROM get_airport_report_by_city(%s)"
+        )
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql, (cidade,))
+            resultados = cursor.fetchall()
+            cursor.close()
+
+            return [
+                {
+                    "cidade_pesquisada": linha[0],
+                    "codigo_iata": linha[1],
+                    "nome_aeroporto": linha[2],
+                    "cidade_aeroporto": linha[3],
+                    "distancia_km": float(linha[4]) if linha[4] is not None else 0.0,
+                    "tipo_aeroporto": linha[5],
+                }
+                for linha in resultados
+            ], None
+
+        except Exception as erro:
+            print(f"Erro ao buscar relatório de aeroportos: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
+
+    def obter_relatorio_escuderias_pilotos(self):
+        sql = "SELECT constructor_name, driver_count FROM get_admin_report_constructors()"
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            resultados = cursor.fetchall()
+            cursor.close()
+
+            return [
+                {
+                    "nome_escuderia": linha[0],
+                    "quantidade_pilotos": linha[1],
+                }
+                for linha in resultados
+            ], None
+
+        except Exception as erro:
+            print(f"Erro ao buscar relatório de escuderias: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
+
+    def obter_relatorio_total_corridas(self):
+        sql = "SELECT total_races FROM get_admin_report_total_races()"
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            resultado = cursor.fetchone()
+            cursor.close()
+
+            if not resultado:
+                return {"total_corridas": 0}, None
+
+            return {"total_corridas": resultado[0]}, None
+
+        except Exception as erro:
+            print(f"Erro ao buscar total de corridas: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
+
+    def obter_relatorio_circuitos(self):
+        sql = (
+            "SELECT circuit_id, circuit_name, race_count, min_laps, avg_laps, max_laps "
+            "FROM get_admin_report_circuits()"
+        )
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            resultados = cursor.fetchall()
+            cursor.close()
+
+            return [
+                {
+                    "circuito_id": linha[0],
+                    "nome_circuito": linha[1],
+                    "quantidade_corridas": linha[2],
+                    "voltas_minimas": linha[3],
+                    "voltas_medias": float(linha[4]) if linha[4] is not None else 0.0,
+                    "voltas_maximas": linha[5],
+                }
+                for linha in resultados
+            ], None
+
+        except Exception as erro:
+            print(f"Erro ao buscar relatório de circuitos: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)
+
+    def obter_relatorio_corridas_por_circuito(self, circuit_id):
+        sql = (
+            "SELECT race_name, race_date, recorded_laps, participating_drivers "
+            "FROM get_report_races_by_circuit(%s)"
+        )
+        conn = None
+        try:
+            conn = self._db_pool.getconn()
+            cursor = conn.cursor()
+            cursor.execute(sql, (circuit_id,))
+            resultados = cursor.fetchall()
+            cursor.close()
+
+            return [
+                {
+                    "nome_corrida": linha[0],
+                    "data": linha[1].strftime("%Y-%m-%d") if linha[1] else None,
+                    "voltas_registradas": linha[2] if linha[2] is not None else 0,
+                    "pilotos_participantes": linha[3],
+                }
+                for linha in resultados
+            ], None
+
+        except Exception as erro:
+            print(f"Erro ao buscar corridas do circuito: {erro}")
+            return None, "Erro interno no servidor"
+        finally:
+            if conn:
+                self._db_pool.putconn(conn)

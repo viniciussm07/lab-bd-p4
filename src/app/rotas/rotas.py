@@ -121,6 +121,37 @@ def rotas(aplicacao):
     def obter_ranking_pilotos_admin(usuario_logado):
         return admin_cont.api_obter_ranking_pilotos()
 
+    @aplicacao.route('/api/admin/relatorio-contagem-status', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_relatorio_status_admin(usuario_logado):
+        return admin_cont.api_obter_relatorio_contagem_status()
+
+    @aplicacao.route('/api/admin/relatorio-aeroportos', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_relatorio_aeroportos_admin(usuario_logado):
+        cidade = request.args.get('cidade')
+        return admin_cont.api_obter_relatorio_aeroportos(cidade)
+
+    @aplicacao.route('/api/admin/relatorio-escuderias', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_relatorio_escuderias_admin(usuario_logado):
+        return admin_cont.api_obter_relatorio_escuderias_pilotos()
+
+    @aplicacao.route('/api/admin/relatorio-corridas/total', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_relatorio_total_corridas_admin(usuario_logado):
+        return admin_cont.api_obter_relatorio_total_corridas()
+
+    @aplicacao.route('/api/admin/relatorio-corridas/circuitos', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_relatorio_circuitos_admin(usuario_logado):
+        return admin_cont.api_obter_relatorio_circuitos()
+
+    @aplicacao.route('/api/admin/relatorio-corridas/circuito/<int:circuit_id>', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_relatorio_corridas_circuito_admin(usuario_logado, circuit_id):
+        return admin_cont.api_obter_relatorio_corridas_por_circuito(circuit_id)
+
     # --- Perfil Comum ---
     @aplicacao.route('/api/me', methods=['GET'])
     @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
@@ -144,6 +175,8 @@ def rotas(aplicacao):
             return render_template('dashboard_piloto.html')
         if tipo == 'Escuderia':
             return render_template('dashboard_escuderia.html')
+        if tipo == 'Admin':
+            return render_template('dashboard_admin.html')
         
     @aplicacao.route('/relatorios', methods=['GET'])
     @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
@@ -153,6 +186,8 @@ def rotas(aplicacao):
             return render_template('relatorios_piloto.html')
         if tipo == 'Escuderia':
             return render_template('relatorios_escuderia.html')
+        if tipo == 'Admin':
+            return render_template('relatorios_admin.html')
         
     @aplicacao.route('/', methods=['GET'])
     def view_login():
