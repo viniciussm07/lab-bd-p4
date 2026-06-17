@@ -29,7 +29,8 @@ lab-bd-p4/
 ├── Makefile                  # up-init, up-restore, dump, psql, etc.
 ├── dados/                    # CSV/TSV de carga (F1 + geografia)
 ├── exercicios/               # SQL dos exercícios (montado no container em /home/exercicios)
-├── insomnia/                 # Coleção Insomnia para testar a API
+├── insomnia/                 # Coleção Insomnia + CSV de teste (upload pilotos)
+│   └── lab-bd-p4-api.json
 ├── db/
 │   ├── init/
 │   │   ├── 01_schema.sql     # Esquema relacional
@@ -54,6 +55,13 @@ lab-bd-p4/
         ├── middlewares/
         ├── rotas/
         └── views/templates/
+            ├── login.html
+            ├── dashboard_piloto.html
+            ├── dashboard_escuderia.html
+            ├── dashboard_admin.html
+            ├── relatorios_piloto.html
+            ├── relatorios_escuderia.html
+            └── relatorios_admin.html
 ```
 
 ## Status de implementação
@@ -65,17 +73,17 @@ Legenda: **SQL** = scripts em `db/init/` · **Backend** = Flask (rotas, DAOs, co
 | Login / logout / auditoria | ✅ | ✅ | ✅ |
 | Dashboard Piloto | ✅ | ✅ | ✅ |
 | Dashboard Escuderia | ✅ | ✅ | ✅ |
-| Dashboard Admin | ✅ | ✅ | ❌ |
+| Dashboard Admin | ✅ | ✅ | ✅ |
 | Tela de relatórios — Piloto | ✅ | ✅ | ✅ |
 | Tela de relatórios — Escuderia | ✅ | ✅ | ✅ |
-| Tela de relatórios — Admin | ✅ | ❌ | ❌ |
+| Tela de relatórios — Admin | ✅ | ✅ | ✅ |
 | Cadastrar escuderia (Admin) | ⚠️ | ❌ | ❌ |
 | Cadastrar piloto — formulário (Admin) | ⚠️ | ❌ | ❌ |
 | Consultar piloto por sobrenome (Escuderia) | ✅ | ✅ | ✅ |
 | Inserir pilotos por arquivo (Escuderia) | ✅ | ✅ | ✅ |
 | Triggers de sincronização USERS | ⚠️ | — | — |
 
-**Resumo:** Piloto e Escuderia estão integrados (SQL → API → tela). O **dashboard Admin** tem SQL e API prontos (`admin_dao.py`, `/api/admin/*`); falta `dashboard_admin.html`. Relatórios e cadastros do Admin ainda sem backend/frontend.
+**Resumo:** Piloto, Escuderia e Admin têm dashboards e relatórios integrados (SQL → API → tela). Pendente: formulários de cadastro de escuderias/pilotos pelo Admin (RF-07/RF-08).
 
 Credenciais de teste (aplicação):
 
@@ -94,18 +102,18 @@ Cada item abaixo reflete o enunciado oficial. O status indica o que já está pr
 | ID | Requisito | SQL | Backend | Frontend |
 |----|-----------|:---:|:-------:|:--------:|
 | RF-01 | **Tela de Login** — autenticação e redirecionamento ao dashboard | ✅ | ✅ | ✅ |
-| RF-02 | **Tela de Dashboard (estrutura comum)** — usuário logado, dados do perfil, navegação e link para relatórios | ⚠️ | ⚠️ | ⚠️ |
-| RF-03 | **Dashboard Admin** — contadores; corridas da última temporada; ranking de escuderias e pilotos por pontos | ✅ | ✅ | ❌ |
+| RF-02 | **Tela de Dashboard (estrutura comum)** — usuário logado, dados do perfil, navegação e link para relatórios | ✅ | ✅ | ✅ |
+| RF-03 | **Dashboard Admin** — contadores; corridas da última temporada; ranking de escuderias e pilotos por pontos | ✅ | ✅ | ✅ |
 | RF-04 | **Dashboard Escuderia (funções SQL)** — vitórias, pilotos distintos, primeiro/último ano | ✅ | ✅ | ✅ |
 | RF-05 | **Dashboard Piloto (funções SQL)** — anos de atividade; estatísticas por ano/circuito | ✅ | ✅ | ✅ |
-| RF-06 | **Tela de Relatórios** — botões por perfil e exibição dos resultados | ⚠️ | ⚠️ | ⚠️ |
+| RF-06 | **Tela de Relatórios** — botões por perfil e exibição dos resultados | ✅ | ✅ | ✅ |
 | RF-07 | **Cadastrar escuderias (Admin)** — `constructor_ref`, `name`, `country_id`, `wikipedia_url` | ⚠️ | ❌ | ❌ |
 | RF-08 | **Cadastrar pilotos (Admin)** — formulário em `DRIVERS` | ⚠️ | ❌ | ❌ |
 | RF-09 | **Consultar piloto por sobrenome (Escuderia)** | ✅ | ✅ | ✅ |
 | RF-10 | **Inserir pilotos por arquivo (Escuderia)** | ✅ | ✅ | ✅ |
-| RF-11 | **Relatório 1 (Admin)** — contagem de resultados por status | ✅ | ❌ | ❌ |
-| RF-12 | **Relatório 2 (Admin)** — aeroportos próximos a cidade brasileira | ✅ | ❌ | ❌ |
-| RF-13 | **Relatório 3 (Admin)** — escuderias + relatório hierárquico de corridas | ✅ | ❌ | ❌ |
+| RF-11 | **Relatório 1 (Admin)** — contagem de resultados por status | ✅ | ✅ | ✅ |
+| RF-12 | **Relatório 2 (Admin)** — aeroportos próximos a cidade brasileira | ✅ | ✅ | ✅ |
+| RF-13 | **Relatório 3 (Admin)** — escuderias + relatório hierárquico de corridas | ✅ | ✅ | ✅ |
 | RF-14 | **Relatório 4 (Escuderia)** — pilotos e vitórias | ✅ | ✅ | ✅ |
 | RF-15 | **Relatório 5 (Escuderia)** — status por escuderia | ✅ | ✅ | ✅ |
 | RF-16 | **Relatório 6 (Piloto)** — pontos por ano e corridas pontuadas | ✅ | ✅ | ✅ |
@@ -114,14 +122,14 @@ Cada item abaixo reflete o enunciado oficial. O status indica o que já está pr
 #### Detalhamento dos RF
 
 - **RF-01** — Implementado em `login.html`, `/api/login`, `/api/logout`, `usuarios_dao.py` e `04_create_and_load_users.sql`.
-- **RF-02** — Piloto e Escuderia: dashboards completos. Admin: rota `/dashboard` ainda não renderiza template; API do dashboard disponível em `/api/admin/*`.
-- **RF-03** — SQL em `06_admin.sql` (`get_db_summary`, `get_latest_season_races`, rankings via `standings`). Backend em `admin_dao.py`, `admin_controllers.py` e rotas `/api/admin/*`. Rankings usam `get_latest_*_standings_from_standings()` (pontos acumulados na última rodada), pois `results` está incompleto na temporada mais recente.
+- **RF-02** — Dashboards completos para Piloto, Escuderia e Admin (`dashboard_*.html`).
+- **RF-03** — `dashboard_admin.html` consome `/api/admin/*`. Rankings usam `get_latest_*_standings_from_standings()` (pontos acumulados na última rodada da temporada mais recente).
 - **RF-04** — Funções em `06_escuderias.sql`; expostas via `/api/escuderia/*` e `dashboard_escuderia.html`.
 - **RF-05** — Funções em `05_pilotos.sql`; expostas via `/api/piloto/*` e `dashboard_piloto.html`.
-- **RF-06** — `relatorios_piloto.html` e `relatorios_escuderia.html` prontos. Falta tela de relatórios do Admin. Rota `/relatorios` não retorna template para Admin.
+- **RF-06** — `relatorios_piloto.html`, `relatorios_escuderia.html` e `relatorios_admin.html`. A rota `/relatorios` renderiza o template conforme o tipo do usuário logado.
 - **RF-07 / RF-08** — Trigger de insert em `constructors`/`drivers` cria usuário em `USERS` (`06_admin.sql`). Falta endpoint e formulário de cadastro pelo Admin.
 - **RF-09 / RF-10** — Integrados no dashboard da escuderia (`consultar_piloto_por_sobrenome`, `inserir_piloto_arquivo`).
-- **RF-11 a RF-13** — Funções SQL prontas em `06_admin.sql`; sem integração na aplicação.
+- **RF-11 a RF-13** — Integrados em `relatorios_admin.html` e rotas `/api/admin/relatorio-*`.
 - **RF-14 / RF-15** — Integrados em `relatorios_escuderia.html` e rotas `/api/escuderia/relatorio-*`.
 - **RF-16 / RF-17** — Integrados em `relatorios_piloto.html` e rotas `/api/piloto/relatorio-*`.
 
@@ -183,9 +191,10 @@ Autenticação via cookie `auth_token` (JWT em cookie httponly), exceto login.
 | `GET /api/escuderia/vitorias`, `/quantidade-pilotos`, `/anos-atividade`, `/piloto-sobrenome`, `/relatorio-pilotos-vitorias`, `/relatorio-contagem-status` | Escuderia |
 | `POST /api/escuderia/piloto-arquivo` | Escuderia |
 | `GET /api/admin/resumo`, `/corridas-ultima-temporada`, `/ranking-escuderias`, `/ranking-pilotos` | Admin |
-| `GET /dashboard`, `GET /relatorios`, `GET /` | Views HTML |
+| `GET /api/admin/relatorio-contagem-status`, `/relatorio-aeroportos`, `/relatorio-escuderias`, `/relatorio-corridas/*` | Admin |
+| `GET /dashboard`, `GET /relatorios`, `GET /` | Views HTML (template por perfil: Piloto, Escuderia ou Admin) |
 
-Coleção de testes: [`insomnia/lab-bd-p4-api.json`](insomnia/lab-bd-p4-api.json) (23 requests).
+Coleção de testes: [`insomnia/lab-bd-p4-api.json`](insomnia/lab-bd-p4-api.json) (29 requests).
 
 ## Instalação e execução
 
@@ -222,7 +231,18 @@ make up-restore
 make up-restore FILE=db/dumps/formula1_db_20260603_191449.sql
 ```
 
-A aplicação web fica em `http://localhost:3000`.
+A aplicação web fica em `http://localhost:3000`. Acesse sempre pelo Flask (não abra os `.html` diretamente no Live Server).
+
+### Desenvolvimento (templates e backend)
+
+Com o volume `.:/app` no Docker:
+
+| Alteração | Precisa reiniciar `web`? |
+|-----------|--------------------------|
+| Arquivos `.html` em `views/templates/` | Não — basta recarregar a página (`F5`). `TEMPLATES_AUTO_RELOAD` está ativo em `src/config/app.py`. |
+| Código Python (`.py`) | Sim — `docker compose restart web` |
+
+Alterações em `db/init/*.sql` em base já existente: reaplique o script com `docker exec -i f1_postgres psql ... < db/init/arquivo.sql`.
 
 ### Outros comandos úteis
 
@@ -299,10 +319,12 @@ make query QUERY="SELECT * FROM get_latest_constructor_standings_from_standings(
 3. Faça login conforme o perfil (ex.: **Login (Admin)** → `admin` / `admin`).
 4. Execute as rotas da pasta correspondente (cookies são enviados automaticamente).
 
-| Pasta | Login necessário |
-|-------|------------------|
-| Piloto | `hamilton_d` / `hamilton` |
-| Escuderia | `ferrari_c` / `ferrari` |
-| Admin (Dashboard) | `admin` / `admin` |
+| Pasta | Login necessário | Conteúdo |
+|-------|------------------|----------|
+| Piloto | `hamilton_d` / `hamilton` | Dashboard + relatórios 6 e 7 |
+| Escuderia | `ferrari_c` / `ferrari` | Ações + relatórios 4 e 5 |
+| Admin | `admin` / `admin` | Dashboard (`/api/admin/resumo`, rankings, etc.) + relatórios 1, 2 e 3 |
 
-Upload de pilotos (Escuderia): selecione `insomnia/exemplo_pilotos.csv` no campo `file` da request **Inserir pilotos via CSV**.
+Variáveis úteis no ambiente **Local** (relatórios Admin): `admin_cidade_aeroportos` (ex.: `Rio de Janeiro`), `admin_circuit_id` (ID obtido em **Relatório 3 — corridas por circuito**).
+
+Upload de pilotos (Escuderia): selecione `insomnia/teste_pilotos.csv` no campo `file` da request **Inserir pilotos via CSV**.
