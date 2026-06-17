@@ -43,6 +43,23 @@
       .collapsible-body.collapsed {
         display: none;
       }
+      .form-label {
+        display: block;
+        font-size: 0.875rem;
+        color: rgb(161 161 170);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      .form-input {
+        width: 100%;
+        background-color: rgb(39 39 42);
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        outline: none;
+      }
+      .form-input:focus {
+        box-shadow: 0 0 0 1px var(--f1-text-highlight);
+      }
     </style>
   </head>
   <body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -100,15 +117,149 @@
         </div>
       </div>
 
+      <div class="grid grid-cols-2 gap-8">
+        <div class="card flex flex-col gap-4">
+          <h2 class="font-bold text-lg border-b border-zinc-800 pb-2">
+            Cadastrar Escuderia
+          </h2>
+          <form id="form-escuderia" class="flex flex-col gap-3" onsubmit="cadastrarEscuderia(event)">
+            <div>
+              <label class="form-label" for="escuderia-ref">constructor_ref</label>
+              <input
+                type="text"
+                id="escuderia-ref"
+                class="form-input"
+                placeholder="Ex: minha_equipe"
+                required
+              />
+            </div>
+            <div>
+              <label class="form-label" for="escuderia-nome">Nome</label>
+              <input
+                type="text"
+                id="escuderia-nome"
+                class="form-input"
+                placeholder="Ex: Minha Equipe F1"
+                required
+              />
+            </div>
+            <div>
+              <label class="form-label" for="escuderia-pais">country_id</label>
+              <input
+                type="number"
+                id="escuderia-pais"
+                class="form-input"
+                placeholder="Ex: 30 (Brasil)"
+                required
+              />
+            </div>
+            <div>
+              <label class="form-label" for="escuderia-wiki">wikipedia_url (opcional)</label>
+              <input
+                type="url"
+                id="escuderia-wiki"
+                class="form-input"
+                placeholder="https://..."
+              />
+            </div>
+            <button
+              type="submit"
+              class="bg-[--f1-text-highlight] font-bold px-4 py-2 rounded hover:brightness-110 transition"
+            >
+              Cadastrar escuderia
+            </button>
+          </form>
+          <div
+            id="resultado-escuderia"
+            class="bg-zinc-900 rounded p-4 text-sm min-h-[80px]"
+          >
+            <p class="text-zinc-500">O resultado do cadastro aparecerá aqui.</p>
+          </div>
+        </div>
+
+        <div class="card flex flex-col gap-4">
+          <h2 class="font-bold text-lg border-b border-zinc-800 pb-2">
+            Cadastrar Piloto
+          </h2>
+          <form id="form-piloto" class="flex flex-col gap-3" onsubmit="cadastrarPiloto(event)">
+            <div>
+              <label class="form-label" for="piloto-ref">driver_ref</label>
+              <input
+                type="text"
+                id="piloto-ref"
+                class="form-input"
+                placeholder="Ex: novo_piloto"
+                required
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="form-label" for="piloto-nome">Nome</label>
+                <input
+                  type="text"
+                  id="piloto-nome"
+                  class="form-input"
+                  placeholder="Given name"
+                  required
+                />
+              </div>
+              <div>
+                <label class="form-label" for="piloto-sobrenome">Sobrenome</label>
+                <input
+                  type="text"
+                  id="piloto-sobrenome"
+                  class="form-input"
+                  placeholder="Family name"
+                  required
+                />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="form-label" for="piloto-nascimento">Data de nascimento</label>
+                <input
+                  type="date"
+                  id="piloto-nascimento"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div>
+                <label class="form-label" for="piloto-pais">country_id</label>
+                <input
+                  type="number"
+                  id="piloto-pais"
+                  class="form-input"
+                  placeholder="Ex: 30"
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="bg-zinc-200 text-zinc-950 font-bold px-4 py-2 rounded hover:bg-white transition"
+            >
+              Cadastrar piloto
+            </button>
+          </form>
+          <div
+            id="resultado-piloto"
+            class="bg-zinc-900 rounded p-4 text-sm min-h-[80px]"
+          >
+            <p class="text-zinc-500">O resultado do cadastro aparecerá aqui.</p>
+          </div>
+        </div>
+      </div>
+
       <div class="card overflow-x-auto">
         <div
-          class="collapsible-header font-bold text-lg border-b border-zinc-800 pb-2"
+          class="collapsible-header font-bold text-lg border-b border-zinc-800 pb-2 collapsed"
           onclick="alternarSecao(this)"
         >
           <span>Corridas da Temporada Mais Recente</span>
           <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
         </div>
-        <div class="collapsible-body">
+        <div class="collapsible-body collapsed">
           <table class="w-full border-separate border-spacing-x-2 races-table">
             <tr>
               <th class="text-left py-2 border-b border-zinc-800">Corrida</th>
@@ -124,13 +275,13 @@
       <div class="grid grid-cols-2 gap-8">
         <div class="card overflow-x-auto">
           <div
-            class="collapsible-header font-bold text-lg border-b border-zinc-800 pb-2"
+            class="collapsible-header font-bold text-lg border-b border-zinc-800 pb-2 collapsed"
             onclick="alternarSecao(this)"
           >
             <span>Ranking de Escuderias (última temporada)</span>
             <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
           </div>
-          <div class="collapsible-body">
+          <div class="collapsible-body collapsed">
             <table class="w-full border-separate border-spacing-x-2 constructors-table">
               <tr>
                 <th class="text-left py-2 border-b border-zinc-800">Escuderia</th>
@@ -142,13 +293,13 @@
 
         <div class="card overflow-x-auto">
           <div
-            class="collapsible-header font-bold text-lg border-b border-zinc-800 pb-2"
+            class="collapsible-header font-bold text-lg border-b border-zinc-800 pb-2 collapsed"
             onclick="alternarSecao(this)"
           >
             <span>Ranking de Pilotos (última temporada)</span>
             <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
           </div>
-          <div class="collapsible-body">
+          <div class="collapsible-body collapsed">
             <table class="w-full border-separate border-spacing-x-2 drivers-table">
               <tr>
                 <th class="text-left py-2 border-b border-zinc-800">Piloto</th>
@@ -195,6 +346,113 @@
         linhas.forEach((html) => {
           tabela.innerHTML += html;
         });
+      }
+
+      function exibirResultadoCadastro(elementoId, sucesso, mensagem, detalhes) {
+        const div = document.getElementById(elementoId);
+        if (sucesso) {
+          div.innerHTML = `
+            <p class="text-green-500 font-bold mb-2">${mensagem}</p>
+            <pre class="text-xs text-zinc-400 whitespace-pre-wrap">${detalhes}</pre>`;
+        } else {
+          div.innerHTML = `<p class="text-[--f1-text-highlight] font-bold">${mensagem}</p>`;
+        }
+      }
+
+      async function cadastrarEscuderia(event) {
+        event.preventDefault();
+        const div = document.getElementById("resultado-escuderia");
+        div.innerHTML = "<p class='text-zinc-500'>Cadastrando...</p>";
+
+        const wiki = document.getElementById("escuderia-wiki").value.trim();
+        const corpo = {
+          constructor_ref: document.getElementById("escuderia-ref").value.trim(),
+          name: document.getElementById("escuderia-nome").value.trim(),
+          country_id: Number(document.getElementById("escuderia-pais").value),
+        };
+        if (wiki) corpo.wikipedia_url = wiki;
+
+        try {
+          const req = await fetch(`${API_BASE_URL}/api/admin/escuderias`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(corpo),
+          });
+          const data = await req.json();
+
+          if (req.ok) {
+            const e = data.escuderia;
+            exibirResultadoCadastro(
+              "resultado-escuderia",
+              true,
+              data.mensagem,
+              `Login gerado: ${e.login_gerado}\nID: ${e.id}\nRef: ${e.constructor_ref}\nNome: ${e.name}`,
+            );
+            document.getElementById("form-escuderia").reset();
+            carregarDashboardAdmin();
+          } else {
+            exibirResultadoCadastro(
+              "resultado-escuderia",
+              false,
+              data.erro || "Falha ao cadastrar escuderia.",
+            );
+          }
+        } catch (err) {
+          exibirResultadoCadastro(
+            "resultado-escuderia",
+            false,
+            "Erro na comunicação com a API.",
+          );
+        }
+      }
+
+      async function cadastrarPiloto(event) {
+        event.preventDefault();
+        const div = document.getElementById("resultado-piloto");
+        div.innerHTML = "<p class='text-zinc-500'>Cadastrando...</p>";
+
+        const corpo = {
+          driver_ref: document.getElementById("piloto-ref").value.trim(),
+          given_name: document.getElementById("piloto-nome").value.trim(),
+          family_name: document.getElementById("piloto-sobrenome").value.trim(),
+          date_of_birth: document.getElementById("piloto-nascimento").value,
+          country_id: Number(document.getElementById("piloto-pais").value),
+        };
+
+        try {
+          const req = await fetch(`${API_BASE_URL}/api/admin/pilotos`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(corpo),
+          });
+          const data = await req.json();
+
+          if (req.ok) {
+            const p = data.piloto;
+            exibirResultadoCadastro(
+              "resultado-piloto",
+              true,
+              data.mensagem,
+              `Login gerado: ${p.login_gerado}\nID: ${p.id}\nRef: ${p.driver_ref}\nNome: ${p.given_name} ${p.family_name}`,
+            );
+            document.getElementById("form-piloto").reset();
+            carregarDashboardAdmin();
+          } else {
+            exibirResultadoCadastro(
+              "resultado-piloto",
+              false,
+              data.erro || "Falha ao cadastrar piloto.",
+            );
+          }
+        } catch (err) {
+          exibirResultadoCadastro(
+            "resultado-piloto",
+            false,
+            "Erro na comunicação com a API.",
+          );
+        }
       }
 
       async function carregarDashboardAdmin() {

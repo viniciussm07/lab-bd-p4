@@ -77,13 +77,13 @@ Legenda: **SQL** = scripts em `db/init/` · **Backend** = Flask (rotas, DAOs, co
 | Tela de relatórios — Piloto | ✅ | ✅ | ✅ |
 | Tela de relatórios — Escuderia | ✅ | ✅ | ✅ |
 | Tela de relatórios — Admin | ✅ | ✅ | ✅ |
-| Cadastrar escuderia (Admin) | ⚠️ | ❌ | ❌ |
-| Cadastrar piloto — formulário (Admin) | ⚠️ | ❌ | ❌ |
+| Cadastrar escuderia (Admin) | ✅ | ✅ | ✅ |
+| Cadastrar piloto — formulário (Admin) | ✅ | ✅ | ✅ |
 | Consultar piloto por sobrenome (Escuderia) | ✅ | ✅ | ✅ |
 | Inserir pilotos por arquivo (Escuderia) | ✅ | ✅ | ✅ |
 | Triggers de sincronização USERS | ⚠️ | — | — |
 
-**Resumo:** Piloto, Escuderia e Admin têm dashboards e relatórios integrados (SQL → API → tela). Pendente: formulários de cadastro de escuderias/pilotos pelo Admin (RF-07/RF-08).
+**Resumo:** Piloto, Escuderia e Admin estão integrados de ponta a ponta (SQL → API → tela), incluindo dashboards, relatórios e cadastros do Admin (RF-07/RF-08). Pendência conhecida: trigger de **UPDATE** em `constructors`/`drivers` para sincronizar `USERS` (RN-05 parcial).
 
 Credenciais de teste (aplicação):
 
@@ -107,8 +107,8 @@ Cada item abaixo reflete o enunciado oficial. O status indica o que já está pr
 | RF-04 | **Dashboard Escuderia (funções SQL)** — vitórias, pilotos distintos, primeiro/último ano | ✅ | ✅ | ✅ |
 | RF-05 | **Dashboard Piloto (funções SQL)** — anos de atividade; estatísticas por ano/circuito | ✅ | ✅ | ✅ |
 | RF-06 | **Tela de Relatórios** — botões por perfil e exibição dos resultados | ✅ | ✅ | ✅ |
-| RF-07 | **Cadastrar escuderias (Admin)** — `constructor_ref`, `name`, `country_id`, `wikipedia_url` | ⚠️ | ❌ | ❌ |
-| RF-08 | **Cadastrar pilotos (Admin)** — formulário em `DRIVERS` | ⚠️ | ❌ | ❌ |
+| RF-07 | **Cadastrar escuderias (Admin)** — `constructor_ref`, `name`, `country_id`, `wikipedia_url` | ✅ | ✅ | ✅ |
+| RF-08 | **Cadastrar pilotos (Admin)** — formulário em `DRIVERS` | ✅ | ✅ | ✅ |
 | RF-09 | **Consultar piloto por sobrenome (Escuderia)** | ✅ | ✅ | ✅ |
 | RF-10 | **Inserir pilotos por arquivo (Escuderia)** | ✅ | ✅ | ✅ |
 | RF-11 | **Relatório 1 (Admin)** — contagem de resultados por status | ✅ | ✅ | ✅ |
@@ -123,11 +123,11 @@ Cada item abaixo reflete o enunciado oficial. O status indica o que já está pr
 
 - **RF-01** — Implementado em `login.html`, `/api/login`, `/api/logout`, `usuarios_dao.py` e `04_create_and_load_users.sql`.
 - **RF-02** — Dashboards completos para Piloto, Escuderia e Admin (`dashboard_*.html`).
-- **RF-03** — `dashboard_admin.html` consome `/api/admin/*`. Rankings usam `get_latest_*_standings_from_standings()` (pontos acumulados na última rodada da temporada mais recente).
+- **RF-03** — `dashboard_admin.html` consome `/api/admin/*` (contadores, corridas e rankings). Seções informativas são colapsáveis e iniciam recolhidas. Rankings usam `get_latest_*_standings_from_standings()` (pontos acumulados na última rodada da temporada mais recente).
 - **RF-04** — Funções em `06_escuderias.sql`; expostas via `/api/escuderia/*` e `dashboard_escuderia.html`.
 - **RF-05** — Funções em `05_pilotos.sql`; expostas via `/api/piloto/*` e `dashboard_piloto.html`.
 - **RF-06** — `relatorios_piloto.html`, `relatorios_escuderia.html` e `relatorios_admin.html`. A rota `/relatorios` renderiza o template conforme o tipo do usuário logado.
-- **RF-07 / RF-08** — Trigger de insert em `constructors`/`drivers` cria usuário em `USERS` (`06_admin.sql`). Falta endpoint e formulário de cadastro pelo Admin.
+- **RF-07 / RF-08** — Formulários no `dashboard_admin.html` (Tela 2, conforme enunciado). Backend: `POST /api/admin/escuderias` e `POST /api/admin/pilotos` em `admin_dao.py` / `admin_controllers.py`. Piloto usa a procedure `inserir_piloto_arquivo`; escuderia insere em `constructors`. Triggers em `06_admin.sql` criam o usuário em `USERS` (`login`: `ref_c` / `ref_d`).
 - **RF-09 / RF-10** — Integrados no dashboard da escuderia (`consultar_piloto_por_sobrenome`, `inserir_piloto_arquivo`).
 - **RF-11 a RF-13** — Integrados em `relatorios_admin.html` e rotas `/api/admin/relatorio-*`.
 - **RF-14 / RF-15** — Integrados em `relatorios_escuderia.html` e rotas `/api/escuderia/relatorio-*`.
@@ -174,6 +174,7 @@ Cada item abaixo reflete o enunciado oficial. O status indica o que já está pr
 | Relatórios Piloto | `05_pilotos.sql` | `relatorio_pontos_por_ano_piloto`, `relatorio_contagem_status_piloto` |
 | Ações Escuderia | `06_escuderias.sql` | `consultar_piloto_por_sobrenome`, `inserir_piloto_arquivo`, etc. |
 | Relatórios Escuderia | `06_escuderias.sql` | `relatorio_pilotos_vitorias`, `relatorio_contagem_status_escuderia` |
+| Cadastro Admin | `06_admin.sql`, `06_escuderias.sql` | Triggers `tg_sync_*_to_users`; piloto via `inserir_piloto_arquivo` |
 | Triggers USERS | `06_admin.sql` | `tg_sync_*_to_users`, triggers AFTER INSERT/DELETE |
 | Dashboard Admin | `06_admin.sql` | `get_db_summary`, `get_latest_season_races`, `get_latest_constructor_standings_from_standings`, `get_latest_driver_standings_from_standings` |
 | Relatórios Admin | `06_admin.sql` | `get_result_status_counts`, `get_airport_report_by_city`, `get_admin_report_*`, `get_report_races_by_circuit` |
@@ -191,10 +192,11 @@ Autenticação via cookie `auth_token` (JWT em cookie httponly), exceto login.
 | `GET /api/escuderia/vitorias`, `/quantidade-pilotos`, `/anos-atividade`, `/piloto-sobrenome`, `/relatorio-pilotos-vitorias`, `/relatorio-contagem-status` | Escuderia |
 | `POST /api/escuderia/piloto-arquivo` | Escuderia |
 | `GET /api/admin/resumo`, `/corridas-ultima-temporada`, `/ranking-escuderias`, `/ranking-pilotos` | Admin |
+| `POST /api/admin/escuderias`, `POST /api/admin/pilotos` | Admin |
 | `GET /api/admin/relatorio-contagem-status`, `/relatorio-aeroportos`, `/relatorio-escuderias`, `/relatorio-corridas/*` | Admin |
 | `GET /dashboard`, `GET /relatorios`, `GET /` | Views HTML (template por perfil: Piloto, Escuderia ou Admin) |
 
-Coleção de testes: [`insomnia/lab-bd-p4-api.json`](insomnia/lab-bd-p4-api.json) (29 requests).
+Coleção de testes: [`insomnia/lab-bd-p4-api.json`](insomnia/lab-bd-p4-api.json) (31 requests).
 
 ## Instalação e execução
 
@@ -323,8 +325,17 @@ make query QUERY="SELECT * FROM get_latest_constructor_standings_from_standings(
 |-------|------------------|----------|
 | Piloto | `hamilton_d` / `hamilton` | Dashboard + relatórios 6 e 7 |
 | Escuderia | `ferrari_c` / `ferrari` | Ações + relatórios 4 e 5 |
-| Admin | `admin` / `admin` | Dashboard (`/api/admin/resumo`, rankings, etc.) + relatórios 1, 2 e 3 |
+| Admin | `admin` / `admin` | Dashboard (contadores, rankings, cadastros RF-07/RF-08) + relatórios 1, 2 e 3 |
 
-Variáveis úteis no ambiente **Local** (relatórios Admin): `admin_cidade_aeroportos` (ex.: `Rio de Janeiro`), `admin_circuit_id` (ID obtido em **Relatório 3 — corridas por circuito**).
+Variáveis úteis no ambiente **Local**:
+
+| Variável | Uso |
+|----------|-----|
+| `admin_cidade_aeroportos` | Relatório 2 — ex.: `Rio de Janeiro` |
+| `admin_circuit_id` | Relatório 3 — corridas por circuito (ID obtido em **Relatório 3 — circuitos**) |
+| `admin_constructor_ref`, `admin_constructor_name`, `admin_country_id`, `admin_wikipedia_url` | Cadastro escuderia (RF-07) |
+| `admin_driver_ref`, `admin_driver_given_name`, `admin_driver_family_name`, `admin_driver_dob`, `admin_country_id` | Cadastro piloto (RF-08) |
+
+`admin_country_id` **30** = Brasil (exemplo).
 
 Upload de pilotos (Escuderia): selecione `insomnia/teste_pilotos.csv` no campo `file` da request **Inserir pilotos via CSV**.

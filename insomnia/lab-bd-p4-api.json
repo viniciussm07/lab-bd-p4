@@ -31,7 +31,15 @@
         "escuderia_password": "ferrari",
         "piloto_sobrenome_busca": "Hamilton",
         "admin_cidade_aeroportos": "Rio de Janeiro",
-        "admin_circuit_id": "1"
+        "admin_circuit_id": "1",
+        "admin_constructor_ref": "test_team",
+        "admin_constructor_name": "Test Team F1",
+        "admin_country_id": "30",
+        "admin_wikipedia_url": "https://en.wikipedia.org/wiki/Test_Team",
+        "admin_driver_ref": "test_driver",
+        "admin_driver_given_name": "Test",
+        "admin_driver_family_name": "Driver",
+        "admin_driver_dob": "2000-01-15"
       },
       "dataPropertyOrder": {
         "&": [
@@ -44,7 +52,15 @@
           "escuderia_password",
           "piloto_sobrenome_busca",
           "admin_cidade_aeroportos",
-          "admin_circuit_id"
+          "admin_circuit_id",
+          "admin_constructor_ref",
+          "admin_constructor_name",
+          "admin_country_id",
+          "admin_wikipedia_url",
+          "admin_driver_ref",
+          "admin_driver_given_name",
+          "admin_driver_family_name",
+          "admin_driver_dob"
         ]
       },
       "color": null,
@@ -115,7 +131,7 @@
       "modified": 1748908800000,
       "created": 1748908800000,
       "name": "Admin",
-      "description": "Requer login como Admin — RF-03 (dashboard) e RF-11 a RF-13 (relatórios)",
+      "description": "Requer login como Admin — RF-03 (dashboard), RF-11 a RF-13 (relatórios), RF-07/RF-08 (cadastros)",
       "environment": {},
       "environmentPropertyOrder": null,
       "metaSortKey": -1250
@@ -815,6 +831,64 @@
       ],
       "authentication": {},
       "metaSortKey": -700,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_cadastrar_escuderia",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/escuderias",
+      "name": "Cadastrar escuderia (RF-07)",
+      "description": "POST /api/admin/escuderias (RF-07)\n\nCria escuderia em constructors. O trigger SQL cria o usuário Escuderia em USERS (login: constructor_ref_c).\n\nCampos: constructor_ref, name, country_id, wikipedia_url (opcional).",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"constructor_ref\": \"{{ _.admin_constructor_ref }}\",\n\t\"name\": \"{{ _.admin_constructor_name }}\",\n\t\"country_id\": {{ _.admin_country_id }},\n\t\"wikipedia_url\": \"{{ _.admin_wikipedia_url }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json", "id": "pair_ct_admin_cad_esc" },
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_cad_esc" }
+      ],
+      "authentication": {},
+      "metaSortKey": -650,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_cadastrar_piloto",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/pilotos",
+      "name": "Cadastrar piloto (RF-08)",
+      "description": "POST /api/admin/pilotos (RF-08)\n\nCria piloto em drivers via procedure inserir_piloto_arquivo. O trigger SQL cria o usuário Piloto em USERS (login: driver_ref_d).\n\nCampos: driver_ref, given_name, family_name, date_of_birth (YYYY-MM-DD), country_id.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"driver_ref\": \"{{ _.admin_driver_ref }}\",\n\t\"given_name\": \"{{ _.admin_driver_given_name }}\",\n\t\"family_name\": \"{{ _.admin_driver_family_name }}\",\n\t\"date_of_birth\": \"{{ _.admin_driver_dob }}\",\n\t\"country_id\": {{ _.admin_country_id }}\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json", "id": "pair_ct_admin_cad_pil" },
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_cad_pil" }
+      ],
+      "authentication": {},
+      "metaSortKey": -600,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,
