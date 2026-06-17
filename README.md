@@ -39,6 +39,8 @@ Se preferir construir a base do zero pelos scripts SQL:
 make up-init
 ```
 
+> **Observação:** caso opte por usar o `make up-init` você verá nos logs do server web (python) alguns erros, pois a aplicação fica tentando se conectar com o banco que ainda não está disponível. É só aguardar o banco de dados subir que a aplicção se conectará automáticamente. Caso queira ver os logs do banco para saber se ele está disponível é só rodar `docker logs -f f1_postgres`.
+
 Ou simplesmente `make up` com `db/data` vazio — o efeito é o mesmo que `up-init` na primeira execução (init completo, mais demorado).
 
 ### Comandos principais
