@@ -128,9 +128,9 @@ Legenda: **SQL** = scripts em `db/init/` · **Backend** = Flask (rotas, DAOs, co
 | Cadastrar piloto — formulário (Admin) | ✅ | ✅ | ✅ |
 | Consultar piloto por sobrenome (Escuderia) | ✅ | ✅ | ✅ |
 | Inserir pilotos por arquivo (Escuderia) | ✅ | ✅ | ✅ |
-| Triggers de sincronização USERS | ⚠️ | — | — |
+| Triggers de sincronização USERS | ✅ | — | — |
 
-**Resumo:** Piloto, Escuderia e Admin estão integrados de ponta a ponta (SQL → API → tela), incluindo dashboards, relatórios e cadastros do Admin (RF-07/RF-08). Pendência conhecida: trigger de **UPDATE** em `constructors`/`drivers` para sincronizar `USERS` (RN-05 parcial).
+**Resumo:** Piloto, Escuderia e Admin estão integrados de ponta a ponta (SQL → API → tela), incluindo dashboards, relatórios, cadastros do Admin (RF-07/RF-08) e sincronização de `USERS` via triggers em `constructors`/`drivers` (RN-05).
 
 Credenciais de teste (aplicação):
 
@@ -174,7 +174,7 @@ Cada item abaixo reflete o enunciado oficial. O status indica o que já está pr
 - **RF-04** — Funções em `06_escuderias.sql`; expostas via `/api/escuderia/*` e `dashboard_escuderia.html`.
 - **RF-05** — Funções em `05_pilotos.sql`; expostas via `/api/piloto/*` e `dashboard_piloto.html`.
 - **RF-06** — `relatorios_piloto.html`, `relatorios_escuderia.html` e `relatorios_admin.html`. A rota `/relatorios` renderiza o template conforme o tipo do usuário logado.
-- **RF-07 / RF-08** — Formulários no `dashboard_admin.html` (Tela 2, conforme enunciado). Backend: `POST /api/admin/escuderias` e `POST /api/admin/pilotos` em `admin_dao.py` / `admin_controllers.py`. Piloto usa a procedure `inserir_piloto_arquivo`; escuderia insere em `constructors`. Triggers em `06_admin.sql` criam o usuário em `USERS` (`login`: `ref_c` / `ref_d`).
+- **RF-07 / RF-08** — Formulários no `dashboard_admin.html` (Tela 2, conforme enunciado). Backend: `POST /api/admin/escuderias` e `POST /api/admin/pilotos` em `admin_dao.py` / `admin_controllers.py`. Piloto usa a procedure `inserir_piloto_arquivo`; escuderia insere em `constructors`. Triggers em `06_admin.sql` sincronizam `USERS` em INSERT, UPDATE e DELETE (`login`: `ref_c` / `ref_d`).
 - **RF-09 / RF-10** — Integrados no dashboard da escuderia (`consultar_piloto_por_sobrenome`, `inserir_piloto_arquivo`).
 - **RF-11 a RF-13** — Integrados em `relatorios_admin.html` e rotas `/api/admin/relatorio-*`.
 - **RF-14 / RF-15** — Integrados em `relatorios_escuderia.html` e rotas `/api/escuderia/relatorio-*`.
@@ -202,14 +202,14 @@ Cada item abaixo reflete o enunciado oficial. O status indica o que já está pr
 | RN-02 | `login` único | ✅ | ✅ | — |
 | RN-03 | `id_original` referencia piloto/escuderia | ✅ | ✅ | — |
 | RN-04 | Piloto só visualiza (sem alteração de dados) | ✅ | ✅ | ✅ |
-| RN-05 | Usuário em `USERS` ao cadastrar escuderia/piloto (triggers) | ⚠️ | — | — |
+| RN-05 | Sincronização de `USERS` com escuderia/piloto (triggers) | ✅ | — | — |
 | RN-06 | Carga inicial de usuários F1 existentes | ✅ | — | — |
 | RN-07 | Login duplicado cancela inserção (via constraint/trigger) | ✅ | — | — |
 | RN-08 | Sobrenome só retorna piloto que correu pela escuderia | ✅ | ✅ | ✅ |
 | RN-09 | Piloto duplicado (mesmo nome/sobrenome) bloqueia inserção | ✅ | ✅ | ✅ |
 | RN-10 | Escopo de acesso por tipo de usuário | ✅ | ✅ | ✅ |
 
-- **RN-05** — Triggers de **INSERT** e **DELETE** em `06_admin.sql`. Não há trigger de **UPDATE** para sincronizar alterações em `constructors`/`drivers` (exigido parcialmente pelo enunciado).
+- **RN-05** — Triggers de **INSERT**, **UPDATE** e **DELETE** em `06_admin.sql` sobre `constructors` e `drivers`. No INSERT, cria o usuário em `USERS`; no DELETE, remove; no UPDATE de `constructor_ref`/`driver_ref`, atualiza `login` e `id_original` (a senha não é alterada).
 
 ## Artefatos SQL por funcionalidade
 
@@ -222,7 +222,7 @@ Cada item abaixo reflete o enunciado oficial. O status indica o que já está pr
 | Ações Escuderia | `06_escuderias.sql` | `consultar_piloto_por_sobrenome`, `inserir_piloto_arquivo`, etc. |
 | Relatórios Escuderia | `06_escuderias.sql` | `relatorio_pilotos_vitorias`, `relatorio_contagem_status_escuderia` |
 | Cadastro Admin | `06_admin.sql`, `06_escuderias.sql` | Triggers `tg_sync_*_to_users`; piloto via `inserir_piloto_arquivo` |
-| Triggers USERS | `06_admin.sql` | `tg_sync_*_to_users`, triggers AFTER INSERT/DELETE |
+| Triggers USERS | `06_admin.sql` | `tg_sync_*_to_users`, triggers AFTER INSERT/UPDATE/DELETE |
 | Dashboard Admin | `06_admin.sql` | `get_db_summary`, `get_latest_season_races`, `get_latest_constructor_standings_from_standings`, `get_latest_driver_standings_from_standings` |
 | Relatórios Admin | `06_admin.sql` | `get_result_status_counts`, `get_airport_report_by_city`, `get_admin_report_*`, `get_report_races_by_circuit` |
 | Auditoria | `07_create_users_log.sql` | `USERS_LOG` |
@@ -348,6 +348,8 @@ make up-init    # ou make up-restore
 ```
 
 ## Consultas e exercícios SQL
+
+> **Observação:** a pasta `exercicios/` do repositório é compartilhada com o container Postgres (`f1_postgres`) via volume Docker, montada em `/home/exercicios` dentro do container. Arquivos criados ou editados em `exercicios/` no host ficam disponíveis no Postgres sem copiar manualmente (e vice-versa, dentro do caminho montado).
 
 Arquivos em `exercicios/` são montados em `/home/exercicios` no container:
 
