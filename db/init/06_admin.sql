@@ -199,6 +199,39 @@ END;
 $$ LANGUAGE plpgsql STABLE;
 
 
+--- Ranking dos pilotos da última temporada (via driver_standings) ---
+CREATE OR REPLACE FUNCTION get_latest_driver_standings_from_standings()
+RETURNS TABLE(driver_name TEXT, total_points NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    WITH ultima_temporada AS (
+        SELECT id FROM seasons ORDER BY year DESC LIMIT 1
+    ),
+    ultima_rodada_por_piloto AS (
+        SELECT
+            ds.driver_id,
+            MAX(st.round) AS round
+        FROM driver_standings ds
+        JOIN standings st ON st.id = ds.standing_id
+        WHERE st.season_id = (SELECT id FROM ultima_temporada)
+        GROUP BY ds.driver_id
+    )
+    SELECT
+        (d.given_name || ' ' || d.family_name)::TEXT,
+        st.points::NUMERIC
+    FROM ultima_rodada_por_piloto ur
+    JOIN driver_standings ds
+        ON ds.driver_id = ur.driver_id
+    JOIN standings st
+        ON st.id = ds.standing_id
+        AND st.round = ur.round
+        AND st.season_id = (SELECT id FROM ultima_temporada)
+    JOIN drivers d ON d.id = ds.driver_id
+    ORDER BY st.points DESC;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
 --------------------------------------------------------------------
 --- Relatórios de admin ---
 --------------------------------------------------------------------
