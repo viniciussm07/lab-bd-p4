@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
---- Triggers para sincronizar inserções em CONSTRUCTORS e DRIVERS ---
+--- Triggers para sincronizar CONSTRUCTORS e DRIVERS com USERS ---
 --------------------------------------------------------------------
 
 --- Trigger para inserção em CONSTRUCTORS ---
@@ -40,6 +40,28 @@ AFTER DELETE ON constructors
 FOR EACH ROW
 EXECUTE FUNCTION tg_sync_delete_constructor_to_users();
 
+--- Trigger de atualização para CONSTRUCTORS ---
+CREATE OR REPLACE FUNCTION tg_sync_update_constructor_to_users()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.constructor_ref IS DISTINCT FROM NEW.constructor_ref THEN
+        UPDATE users
+        SET
+            login = NEW.constructor_ref || '_c',
+            id_original = NEW.constructor_ref
+        WHERE login = OLD.constructor_ref || '_c'
+          AND tipo = 'Escuderia';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_after_constructor_update
+AFTER UPDATE ON constructors
+FOR EACH ROW
+EXECUTE FUNCTION tg_sync_update_constructor_to_users();
+
 
 --- Trigger para inserção em DRIVERS ---
 CREATE OR REPLACE FUNCTION tg_sync_driver_to_users()
@@ -77,6 +99,28 @@ CREATE OR REPLACE TRIGGER trigger_after_driver_delete
 AFTER DELETE ON drivers
 FOR EACH ROW
 EXECUTE FUNCTION tg_sync_delete_driver_to_users();
+
+--- Trigger de atualização para DRIVERS ---
+CREATE OR REPLACE FUNCTION tg_sync_update_driver_to_users()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.driver_ref IS DISTINCT FROM NEW.driver_ref THEN
+        UPDATE users
+        SET
+            login = NEW.driver_ref || '_d',
+            id_original = NEW.driver_ref
+        WHERE login = OLD.driver_ref || '_d'
+          AND tipo = 'Piloto';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_after_driver_update
+AFTER UPDATE ON drivers
+FOR EACH ROW
+EXECUTE FUNCTION tg_sync_update_driver_to_users();
 
 
 --------------------------------------------------------------------
@@ -330,40 +374,6 @@ BEGIN
     ORDER BY distancia_km ASC;
 END;
 $$ LANGUAGE plpgsql STABLE;
-
-
--- Explain analyze para avaliar a performance do relatório de aeroportos com ou sem índices (deixo comentado para facilitar desenvolvimento --- REMOVER DEPOIS ---) ---
--- EXPLAIN ANALYZE (SELECT 
---         c.name::TEXT AS cidade_pesquisada,
---         a.iata_code::VARCHAR AS codigo_iata,
---         a.name::TEXT AS nome_aeroporto,
---         ac.name::TEXT AS cidade_aeroporto,
---         -- Cálculo de Haversine protegido contra estouro de precisão decimal
---         ROUND((6371 * acos(LEAST(GREATEST(
---             cos(radians(c.latitude)) * cos(radians(a.latitude_deg)) * cos(radians(a.longitude_deg) - radians(c.longitude)) + 
---             sin(radians(c.latitude)) * sin(radians(a.latitude_deg))
---         , -1), 1)))::NUMERIC, 2) AS distancia_km,
---         CASE a.airport_type_id 
---             WHEN 4 THEN 'medium_airport'::TEXT 
---             WHEN 7 THEN 'large_airport'::TEXT 
---         END AS tipo_aeroporto
---     FROM cities c
---     JOIN airports a ON 
---         -- Usa Bounding Box para acelerar a consulta, filtrando apenas aeroportos que estejam dentro de uma caixa de 0.9 graus de latitude e 1.2 graus de longitude da cidade (aproximadamente 100 km)
---         -- antes de calcular a distância exata com Haversine
---         a.latitude_deg BETWEEN c.latitude - 0.9 AND c.latitude + 0.9
---         AND a.longitude_deg BETWEEN c.longitude - 1.2 AND c.longitude + 1.2
---     LEFT JOIN cities ac ON a.city_id = ac.id
---     WHERE c.name = 'Rio de Janeiro'
---       AND c.country_id = 30 -- Filtrando diretamente o Brasil pelo ID
---       AND a.airport_type_id IN (4, 7)
---       AND (6371 * acos(LEAST(GREATEST(
---             cos(radians(c.latitude)) * cos(radians(a.latitude_deg)) * cos(radians(a.longitude_deg) - radians(c.longitude)) + 
---             sin(radians(c.latitude)) * sin(radians(a.latitude_deg))
---         , -1), 1))) <= 100
---     ORDER BY distancia_km ASC)
-    --_Os índices utilizados aceleraram a consulta de ~10ms para ~0.2 ms, uma melhoria de 50x na performance
-
 
 ---------------------------------------------------------------------------
 -- Relatório 3 (Escuderias + relatório hierárquico de corridas) --
