@@ -29,7 +29,9 @@
         "admin_password": "admin",
         "escuderia_login": "ferrari_c",
         "escuderia_password": "ferrari",
-        "piloto_sobrenome_busca": "Hamilton"
+        "piloto_sobrenome_busca": "Hamilton",
+        "admin_cidade_aeroportos": "Rio de Janeiro",
+        "admin_circuit_id": "1"
       },
       "dataPropertyOrder": {
         "&": [
@@ -40,7 +42,9 @@
           "admin_password",
           "escuderia_login",
           "escuderia_password",
-          "piloto_sobrenome_busca"
+          "piloto_sobrenome_busca",
+          "admin_cidade_aeroportos",
+          "admin_circuit_id"
         ]
       },
       "color": null,
@@ -110,8 +114,8 @@
       "parentId": "wrk_lab_bdp4",
       "modified": 1748908800000,
       "created": 1748908800000,
-      "name": "Admin (Dashboard)",
-      "description": "Requer login como Admin — RF-03 Dashboard do Administrador",
+      "name": "Admin",
+      "description": "Requer login como Admin — RF-03 (dashboard) e RF-11 a RF-13 (relatórios)",
       "environment": {},
       "environmentPropertyOrder": null,
       "metaSortKey": -1250
@@ -663,6 +667,164 @@
     },
     {
       "_type": "request",
+      "_id": "req_admin_rel1",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/relatorio-contagem-status",
+      "name": "Relatório 1 — contagem por status",
+      "description": "GET /api/admin/relatorio-contagem-status (RF-11)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_rel1" }
+      ],
+      "authentication": {},
+      "metaSortKey": -950,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_rel2_aeroportos",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/relatorio-aeroportos",
+      "name": "Relatório 2 — aeroportos por cidade",
+      "description": "GET /api/admin/relatorio-aeroportos?cidade= (RF-12)\n\nAeroportos médios e grandes próximos a uma cidade brasileira.\n\nParâmetro cidade: variável admin_cidade_aeroportos no ambiente Local.",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_param_admin_cidade",
+          "name": "cidade",
+          "value": "{{ _.admin_cidade_aeroportos }}",
+          "description": "Nome da cidade brasileira (ex.: Rio de Janeiro)",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_rel2" }
+      ],
+      "authentication": {},
+      "metaSortKey": -900,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_rel3_escuderias",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/relatorio-escuderias",
+      "name": "Relatório 3 — escuderias e pilotos",
+      "description": "GET /api/admin/relatorio-escuderias (RF-13, parte 1)\n\nLista escuderias cadastradas e quantidade de pilotos.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_rel3_esc" }
+      ],
+      "authentication": {},
+      "metaSortKey": -850,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_rel3_total",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/relatorio-corridas/total",
+      "name": "Relatório 3 — total de corridas",
+      "description": "GET /api/admin/relatorio-corridas/total (RF-13, nível 1)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_rel3_total" }
+      ],
+      "authentication": {},
+      "metaSortKey": -800,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_rel3_circuitos",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/relatorio-corridas/circuitos",
+      "name": "Relatório 3 — corridas por circuito",
+      "description": "GET /api/admin/relatorio-corridas/circuitos (RF-13, nível 2)\n\nUse circuito_id da resposta no request de detalhes por circuito.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_rel3_circuitos" }
+      ],
+      "authentication": {},
+      "metaSortKey": -750,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_rel3_circuito_detalhe",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/relatorio-corridas/circuito/{{ _.admin_circuit_id }}",
+      "name": "Relatório 3 — detalhes do circuito",
+      "description": "GET /api/admin/relatorio-corridas/circuito/<id> (RF-13, nível 3)\n\nCorridas e pilotos em um circuito. Ajuste admin_circuit_id no ambiente Local (obtenha o ID em Relatório 3 — corridas por circuito).",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_rel3_circuito" }
+      ],
+      "authentication": {},
+      "metaSortKey": -700,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
       "_id": "req_view_login",
       "parentId": "fld_views",
       "modified": 1748908800000,
@@ -692,7 +854,7 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/dashboard",
       "name": "Dashboard",
-      "description": "GET /dashboard — HTML do dashboard (Piloto ou Escuderia). Requer login.",
+      "description": "GET /dashboard — HTML do dashboard (Piloto, Escuderia ou Admin). Requer login.",
       "method": "GET",
       "body": {},
       "parameters": [],
@@ -715,7 +877,7 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/relatorios",
       "name": "Relatórios",
-      "description": "GET /relatorios — HTML de relatórios (Piloto ou Escuderia). Requer login.",
+      "description": "GET /relatorios — HTML de relatórios (Piloto, Escuderia ou Admin). Requer login.",
       "method": "GET",
       "body": {},
       "parameters": [],
