@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR" class="bg-zinc-950">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard da Escuderia | Sistema F1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --f1-bg: #15151e;
+        --f1-text-highlight: #e43834;
+      }
+      .card {
+        background-color: var(--f1-bg);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+    <nav class="bg-[--f1-bg]">
+      <div class="mx-auto max-w-7xl px-4">
+        <div class="flex h-16 items-center justify-between">
+          <div class="flex gap-2 items-center">
+            <div>
+              <img src="/estatico/resources/icone-f1.png" class="size-20" />
+            </div>
+            <div class="flex">
+              <a
+                href="/dashboard"
+                class="px-2 py-1 text-[--f1-text-highlight] font-bold"
+                >Dashboard</a
+              >
+              <a href="/relatorios" class="px-2 py-1">Relatórios</a>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div>
+              <p class="nome-escuderia font-bold"></p>
+              <p class="qtd-pilotos-nav text-sm text-zinc-300"></p>
+            </div>
+            <button
+              onclick="realizarLogout()"
+              class="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold px-3 py-1.5 rounded transition"
+            >
+              Sair
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main
+      class="flex-grow mx-auto max-w-7xl py-8 px-4 w-full flex flex-col gap-8"
+    >
+      <div class="grid grid-cols-4 gap-4">
+        <div class="card">
+          <p>Primeiro Ano</p>
+          <p class="data-primeiro-ano text-4xl font-bold">-</p>
+        </div>
+        <div class="card">
+          <p>Último Ano</p>
+          <p class="data-ultimo-ano text-4xl font-bold">-</p>
+        </div>
+        <div class="card">
+          <p>Total de Vitórias</p>
+          <p
+            class="data-vitorias text-4xl font-bold text-[--f1-text-highlight]"
+          >
+            -
+          </p>
+        </div>
+        <div class="card">
+          <p>Pilotos Diferentes</p>
+          <p class="data-qtd-pilotos text-4xl font-bold">-</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-8">
+        <div class="card flex flex-col gap-4">
+          <h2 class="font-bold text-lg border-b border-zinc-800 pb-2">
+            Consultar Piloto por Sobrenome
+          </h2>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="input-sobrenome"
+              placeholder="Digite o sobrenome..."
+              class="bg-zinc-800 p-2 rounded flex-grow outline-none focus:ring-1 focus:ring-[--f1-text-highlight]"
+            />
+            <button
+              onclick="buscarPiloto()"
+              class="bg-[--f1-text-highlight] font-bold px-4 py-2 rounded hover:brightness-110 transition"
+            >
+              Buscar
+            </button>
+          </div>
+          <div
+            id="resultado-busca"
+            class="bg-zinc-900 rounded p-4 text-sm min-h-[100px]"
+          >
+            <p class="text-zinc-500">Os resultados aparecerão aqui.</p>
+          </div>
+        </div>
+
+        <div class="card flex flex-col gap-4">
+          <h2 class="font-bold text-lg border-b border-zinc-800 pb-2">
+            Inserir Pilotos via Arquivo (CSV)
+          </h2>
+          <div class="flex gap-2 items-center">
+            <input
+              type="file"
+              id="input-arquivo"
+              accept=".csv"
+              class="bg-zinc-800 p-2 rounded flex-grow text-sm"
+            />
+            <button
+              onclick="enviarArquivo()"
+              class="bg-zinc-200 text-zinc-950 font-bold px-4 py-2 rounded hover:bg-white transition"
+            >
+              Enviar
+            </button>
+          </div>
+          <div
+            id="resultado-arquivo"
+            class="bg-zinc-900 rounded p-4 text-sm min-h-[100px]"
+          >
+            <p class="text-zinc-500">
+              Selecione um arquivo .csv contendo: driver_ref, given_name,
+              family_name, date_of_birth, country_id
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="border-t border-zinc-800 py-6">
+      <div
+        class="mx-auto max-w-7xl px-4 text-center text-zinc-500 sm:px-6 lg:px-8"
+      >
+        <p>Desenvolvido por:</p>
+        <ul>
+          <li>Cleverson Cristian Oliveira Sousa</li>
+          <li>Vinicius Soares Martin</li>
+          <li>Caio Delgado Pires</li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      const API_BASE_URL = "http://localhost:3000";
+
+      async function carregarDashboardEscuderia() {
+        try {
+          const [reqAnos, reqVitorias, reqPilotos, reqPerfil] =
+            await Promise.all([
+              fetch(`${API_BASE_URL}/api/escuderia/anos-atividade`, {
+                credentials: "include",
+              }),
+              fetch(`${API_BASE_URL}/api/escuderia/vitorias`, {
+                credentials: "include",
+              }),
+              fetch(`${API_BASE_URL}/api/escuderia/quantidade-pilotos`, {
+                credentials: "include",
+              }),
+              fetch(`${API_BASE_URL}/api/me`, { credentials: "include" }),
+            ]);
+
+          const anos = await reqAnos.json();
+          const vitorias = await reqVitorias.json();
+          const pilotos = await reqPilotos.json();
+          const perfil = await reqPerfil.json();
+
+          document.querySelector(".data-primeiro-ano").innerText =
+            anos.primeiro_ano || "-";
+          document.querySelector(".data-ultimo-ano").innerText =
+            anos.ultimo_ano || "-";
+          document.querySelector(".data-vitorias").innerText =
+            vitorias.vitorias || "0";
+          document.querySelector(".data-qtd-pilotos").innerText =
+            pilotos.numero_pilotos || "0";
+
+          document.querySelector(".nome-escuderia").innerText =
+            perfil.nome_escuderia || "Escuderia";
+          document.querySelector(".qtd-pilotos-nav").innerText =
+            `${pilotos.numero_pilotos || 0} piloto(s) associados`;
+        } catch (err) {
+          console.error("Deu erro ao carregar o dashboard:", err);
+        }
+      }
+
+      async function buscarPiloto() {
+        const sobrenome = document.getElementById("input-sobrenome").value;
+        const divResultado = document.getElementById("resultado-busca");
+        if (!sobrenome) return;
+
+        divResultado.innerHTML = "<p class='text-zinc-500'>Buscando...</p>";
+
+        try {
+          const req = await fetch(
+            `${API_BASE_URL}/api/escuderia/piloto-sobrenome?sobrenome=${sobrenome}`,
+            { credentials: "include" },
+          );
+          const data = await req.json();
+
+          if (Array.isArray(data) && data.length > 0) {
+            divResultado.innerHTML = data
+              .map(
+                (p) => `
+              <div class="mb-2 border-b border-zinc-800 pb-2">
+                <p class="font-bold">${p.nome_completo}</p>
+                <p class="text-zinc-400">Nascimento: ${p.data_nascimento} | Nacionalidade: ${p.nacionalidade}</p>
+              </div>
+            `,
+              )
+              .join("");
+          } else {
+            divResultado.innerHTML =
+              "<p class='text-[--f1-text-highlight]'>Nenhum piloto encontrado na sua escuderia.</p>";
+          }
+        } catch (err) {
+          divResultado.innerHTML =
+            "<p class='text-[--f1-text-highlight]'>Erro ao realizar busca.</p>";
+        }
+      }
+
+      async function enviarArquivo() {
+        const fileInput = document.getElementById("input-arquivo");
+        const divResultado = document.getElementById("resultado-arquivo");
+
+        if (!fileInput.files.length) {
+          divResultado.innerHTML =
+            "<p class='text-[--f1-text-highlight]'>Seleciona um arquivo aí.</p>";
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        divResultado.innerHTML =
+          "<p class='text-zinc-500'>Processando o arquivo no banco...</p>";
+
+        try {
+          const req = await fetch(
+            `${API_BASE_URL}/api/escuderia/piloto-arquivo`,
+            {
+              method: "POST",
+              body: formData,
+              credentials: "include",
+            },
+          );
+          const data = await req.json();
+
+          if (req.ok) {
+            divResultado.innerHTML = `
+              <p class="text-green-500 font-bold mb-2">${data.sucessos} piloto(s) inserido(s) com sucesso!</p>
+              ${data.erros.length > 0 ? `<p class="text-[--f1-text-highlight] mb-1">Log de erros:</p><ul class="list-disc pl-4 text-xs text-zinc-400">${data.erros.map((e) => `<li>${e}</li>`).join("")}</ul>` : ""}
+            `;
+            carregarDashboardEscuderia();
+          } else {
+            divResultado.innerHTML = `<p class='text-[--f1-text-highlight]'>Erro: ${data.erro}</p>`;
+          }
+        } catch (err) {
+          divResultado.innerHTML =
+            "<p class='text-[--f1-text-highlight]'>Falha de conexão com o backend.</p>";
+        }
+      }
+
+      // chama a rota de logout para registrar a saida na tabela USERS_LOG e limpar o cookie
+      async function realizarLogout() {
+        try {
+          const req = await fetch(`${API_BASE_URL}/api/logout`, {
+            method: "POST",
+            credentials: "include",
+          });
+          if (req.ok) {
+            window.location.href = "/";
+          }
+        } catch (err) {
+          console.error("Erro na requisicao de logout:", err);
+        }
+      }
+
+      carregarDashboardEscuderia();
+    </script>
+  </body>
+</html>

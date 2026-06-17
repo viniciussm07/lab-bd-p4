@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR" class="bg-zinc-950">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatórios da Escuderia | Sistema F1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --f1-bg: #15151e;
+        --f1-text-highlight: #e43834;
+      }
+      .card {
+        background-color: var(--f1-bg);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+    <nav class="bg-[--f1-bg]">
+      <div class="mx-auto max-w-7xl px-4">
+        <div class="flex h-16 items-center justify-between">
+          <div class="flex gap-2 items-center">
+            <div>
+              <img src="/estatico/resources/icone-f1.png" class="size-20" />
+            </div>
+            <div class="flex">
+              <a href="/dashboard" class="px-2 py-1">Dashboard</a>
+              <a
+                href="/relatorios"
+                class="px-2 py-1 font-bold text-[--f1-text-highlight]"
+                >Relatórios</a
+              >
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div>
+              <p class="nome-escuderia font-bold"></p>
+            </div>
+            <button
+              onclick="realizarLogout()"
+              class="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold px-3 py-1.5 rounded transition"
+            >
+              Sair
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="flex-grow mx-auto max-w-7xl py-8 px-4 flex gap-8 w-full">
+      <div class="w-1/4 flex flex-col gap-4">
+        <button
+          onclick="carregarRelatorio4()"
+          class="card text-left hover:bg-zinc-800 transition"
+        >
+          Relatório 4: Pilotos por Vitórias
+        </button>
+        <button
+          onclick="carregarRelatorio5()"
+          class="card text-left hover:bg-zinc-800 transition"
+        >
+          Relatório 5: Status da Escuderia
+        </button>
+      </div>
+
+      <div class="w-3/4 card">
+        <table class="w-full border-separate border-spacing-x-2 report-table">
+          <tr>
+            <td class="text-zinc-500 text-center py-8">
+              Selecione um relatório ao lado.
+            </td>
+          </tr>
+        </table>
+      </div>
+    </main>
+
+    <footer class="border-t border-zinc-800 py-6">
+      <div
+        class="mx-auto max-w-7xl px-4 text-center text-zinc-500 sm:px-6 lg:px-8"
+      >
+        <p>Desenvolvido por:</p>
+        <ul>
+          <li>Cleverson Cristian Oliveira Sousa</li>
+          <li>Vinicius Soares Martin</li>
+          <li>Caio Delgado Pires</li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      const API_BASE_URL = "http://localhost:3000";
+
+      // Busca os dados do usuário logado pra montar o header
+      async function carregarPerfil() {
+        try {
+          const req = await fetch(`${API_BASE_URL}/api/me`, {
+            credentials: "include",
+          });
+          const perfil = await req.json();
+          document.querySelector(".nome-escuderia").innerText =
+            perfil.nome_escuderia || "Escuderia";
+        } catch (err) {
+          console.error("Falha ao buscar perfil:", err);
+        }
+      }
+
+      // Busca a lista de pilotos e quantas vitórias cada um tem
+      async function carregarRelatorio4() {
+        try {
+          const req = await fetch(
+            `${API_BASE_URL}/api/escuderia/relatorio-pilotos-vitorias`,
+            { credentials: "include" },
+          );
+          const data = await req.json();
+          const tabela = document.querySelector(".report-table");
+
+          tabela.innerHTML = `
+              <tr>
+                  <th class="text-left py-2 border-b border-zinc-800">Piloto</th>
+                  <th class="text-left py-2 border-b border-zinc-800">Vitórias pela Escuderia</th>
+              </tr>`;
+
+          if (Array.isArray(data)) {
+            data.forEach((item) => {
+              tabela.innerHTML += `<tr><td class="text-left py-3">${item.nome_completo}</td><td class="text-left py-3">${item.quantidade_vitorias}</td></tr>`;
+            });
+          } else {
+            tabela.innerHTML += `<tr><td colspan="2" class="text-[--f1-text-highlight] py-4">${data.erro || "Nenhum dado retornado."}</td></tr>`;
+          }
+        } catch (err) {
+          document.querySelector(".report-table").innerHTML =
+            "<tr><td class='text-[--f1-text-highlight] py-4'>Erro na requisição do relatório.</td></tr>";
+        }
+      }
+
+      // Conta o número de status (acidentes, quebras, etc) da escuderia
+      async function carregarRelatorio5() {
+        try {
+          const req = await fetch(
+            `${API_BASE_URL}/api/escuderia/relatorio-contagem-status`,
+            { credentials: "include" },
+          );
+          const data = await req.json();
+          const tabela = document.querySelector(".report-table");
+
+          tabela.innerHTML = `
+              <tr>
+                  <th class="text-left py-2 border-b border-zinc-800">Status</th>
+                  <th class="text-left py-2 border-b border-zinc-800">Ocorrências</th>
+              </tr>`;
+
+          if (Array.isArray(data)) {
+            data.forEach((item) => {
+              tabela.innerHTML += `<tr><td class="text-left py-3">${item.nome}</td><td class="text-left py-3">${item.ocorrencias}</td></tr>`;
+            });
+          } else {
+            tabela.innerHTML += `<tr><td colspan="2" class="text-[--f1-text-highlight] py-4">${data.erro || "Nenhum dado retornado."}</td></tr>`;
+          }
+        } catch (err) {
+          document.querySelector(".report-table").innerHTML =
+            "<tr><td class='text-[--f1-text-highlight] py-4'>Erro na requisição do relatório.</td></tr>";
+        }
+      }
+
+      // limpa a sessao no banco antes de mandar pro index
+      async function realizarLogout() {
+        try {
+          const req = await fetch(`${API_BASE_URL}/api/logout`, {
+            method: "POST",
+            credentials: "include",
+          });
+          if (req.ok) {
+            window.location.href = "/";
+          }
+        } catch (err) {
+          console.error("Erro na requisicao de logout:", err);
+        }
+      }
+
+      carregarPerfil();
+    </script>
+  </body>
+</html>
