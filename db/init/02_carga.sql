@@ -253,14 +253,14 @@ CREATE TEMP TABLE stg_cities (
 -- OPÇÕES DO \copy:
 -- - FORMAT csv: Indica que é arquivo CSV (comma-separated values)
 -- - HEADER true: Primeira linha é cabeçalho (nomes das colunas)
--- - ENCODING 'LATIN1': Para circuits.csv (dados antigos podem ter encoding diferente)
+-- - ENCODING 'UTF-8': Para arquivos com codificação UTF-8
 -- - DELIMITER E'\t': Para TSV (tab-separated), E'\t' é tabulação
 -- - HEADER false: Alguns arquivos não têm cabeçalho
 
 -- - /dir/local/ é o caminho local onde os arquivos estão armazenados (ajustar conforme necessário)
 
 -- Carregar dados da Fórmula 1 (F1) para staging
-\copy stg_circuits              FROM '/dir/local/circuits.csv'                 WITH (FORMAT csv, HEADER true, ENCODING 'LATIN1')
+\copy stg_circuits              FROM '/dir/local/circuits.csv'                 WITH (FORMAT csv, HEADER true, ENCODING 'UTF8')
 \copy stg_constructors          FROM '/dir/local/constructors.csv'             WITH (FORMAT csv, HEADER true)
 \copy stg_drivers               FROM '/dir/local/drivers.csv'                  WITH (FORMAT csv, HEADER true)
 \copy stg_races                 FROM '/dir/local/races.csv'                    WITH (FORMAT csv, HEADER true)
