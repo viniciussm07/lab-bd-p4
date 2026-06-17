@@ -11,7 +11,7 @@
       "modified": 1748908800000,
       "created": 1748908800000,
       "name": "Lab BD P4 - Formula 1 API",
-      "description": "Coleção completa para testar a API Flask.\n\nAutenticação via cookie httponly auth_token (JWT).\n\nOrdem sugerida:\n1. Login (Piloto, Escuderia ou Admin)\n2. GET /api/me — validar perfil\n3. Rotas específicas do tipo de usuário\n4. POST /api/logout — encerrar sessão\n\nCredenciais (db/init/04_create_and_load_users.sql):\n- Piloto: hamilton_d / hamilton\n- Admin: admin / admin\n- Escuderia: ferrari_c / ferrari",
+      "description": "Coleção completa para testar a API Flask.\n\nAutenticação via cookie httponly auth_token (JWT).\n\nOrdem sugerida:\n1. Login (Piloto, Escuderia ou Admin)\n2. GET /api/me — validar perfil\n3. Rotas específicas do tipo de usuário\n4. POST /api/logout — encerrar sessão\n\nCredenciais (db/init/04_create_and_load_users.sql):\n- Piloto: hamilton_d / hamilton\n- Admin: admin / admin\n- Escuderia: ferrari_c / ferrari\n\nDashboard Admin: faça Login (Admin) e use as rotas em /api/admin/*",
       "scope": "collection"
     },
     {
@@ -106,6 +106,18 @@
     },
     {
       "_type": "request_group",
+      "_id": "fld_admin",
+      "parentId": "wrk_lab_bdp4",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "name": "Admin (Dashboard)",
+      "description": "Requer login como Admin — RF-03 Dashboard do Administrador",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1250
+    },
+    {
+      "_type": "request_group",
       "_id": "fld_views",
       "parentId": "wrk_lab_bdp4",
       "modified": 1748908800000,
@@ -153,7 +165,7 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/login",
       "name": "Login (Admin)",
-      "description": "Autentica administrador.",
+      "description": "Login como Admin. Necessário antes das rotas em /api/admin/*.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
@@ -538,6 +550,106 @@
       "parameters": [],
       "headers": [
         { "name": "Accept", "value": "application/json", "id": "pair_accept_esc_rel5" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_resumo",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/resumo",
+      "name": "Resumo do banco",
+      "description": "GET /api/admin/resumo — total de pilotos, escuderias e temporadas.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_resumo" }
+      ],
+      "authentication": {},
+      "metaSortKey": -4000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_corridas",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/corridas-ultima-temporada",
+      "name": "Corridas da última temporada",
+      "description": "GET /api/admin/corridas-ultima-temporada — circuito, data, horário e voltas registradas.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_corridas" }
+      ],
+      "authentication": {},
+      "metaSortKey": -3000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_ranking_escuderias",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/ranking-escuderias",
+      "name": "Ranking de escuderias",
+      "description": "GET /api/admin/ranking-escuderias — pontos na temporada mais recente (via standings).",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_rank_esc" }
+      ],
+      "authentication": {},
+      "metaSortKey": -2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_admin_ranking_pilotos",
+      "parentId": "fld_admin",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/admin/ranking-pilotos",
+      "name": "Ranking de pilotos",
+      "description": "GET /api/admin/ranking-pilotos — pontos na temporada mais recente (via standings).",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_admin_rank_pil" }
       ],
       "authentication": {},
       "metaSortKey": -1000,
