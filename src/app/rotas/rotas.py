@@ -2,12 +2,14 @@
 from src.app.controllers.usuarios_controllers import UsuariosControllers
 from src.app.controllers.pilotos_controllers import PilotosControllers
 from src.app.controllers.escuderias_controllers import EscuderiaControllers
+from src.app.controllers.admin_controllers import AdminControllers
 from src.app.middlewares.auth_middleware import auth_middleware
 from flask import request, render_template, jsonify
 
 usuario_cont = UsuariosControllers()
 piloto_cont = PilotosControllers()
 escuderia_cont = EscuderiaControllers()
+admin_cont = AdminControllers()
 
 def rotas(aplicacao):
     # Evitar problema com o CORS
@@ -98,6 +100,27 @@ def rotas(aplicacao):
         constructor_ref = usuario_logado.get('id_original')
         return escuderia_cont.api_obter_relatorio_5_escuderia(constructor_ref)
     
+    # --- Rotas de Admin (Dashboard) ---
+    @aplicacao.route('/api/admin/resumo', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_resumo_admin(usuario_logado):
+        return admin_cont.api_obter_resumo()
+
+    @aplicacao.route('/api/admin/corridas-ultima-temporada', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_corridas_ultima_temporada_admin(usuario_logado):
+        return admin_cont.api_obter_corridas_ultima_temporada()
+
+    @aplicacao.route('/api/admin/ranking-escuderias', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_ranking_escuderias_admin(usuario_logado):
+        return admin_cont.api_obter_ranking_escuderias()
+
+    @aplicacao.route('/api/admin/ranking-pilotos', methods=['GET'])
+    @auth_middleware(tipo_permitido="Admin")
+    def obter_ranking_pilotos_admin(usuario_logado):
+        return admin_cont.api_obter_ranking_pilotos()
+
     # --- Perfil Comum ---
     @aplicacao.route('/api/me', methods=['GET'])
     @auth_middleware(tipo_permitido=["Piloto", "Escuderia", "Admin"])
