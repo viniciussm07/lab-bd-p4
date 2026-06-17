@@ -355,7 +355,7 @@
         grupo.className = "circuito-grupo";
         grupo.innerHTML = `
           <div class="collapsible-header collapsed" data-id="${item.circuito_id}">
-            <span>${item.nome_circuito} — ${item.quantidade_corridas} corrida(s)</span>
+            <span>${item.nome_circuito} - ${item.quantidade_corridas} corrida(s)</span>
             <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
           </div>
           <div class="collapsible-body circuito-detalhes collapsed"></div>
@@ -393,6 +393,19 @@
             });
           }
 
+          let circuitosRows = "";
+          if (Array.isArray(circuitos)) {
+            circuitos.forEach((item) => {
+              circuitosRows += `<tr>
+                <td class="text-left py-3">${item.nome_circuito}</td>
+                <td class="text-left py-3">${item.quantidade_corridas}</td>
+                <td class="text-left py-3">${item.voltas_minimas}</td>
+                <td class="text-left py-3">${item.voltas_medias}</td>
+                <td class="text-left py-3">${item.voltas_maximas}</td>
+              </tr>`;
+            });
+          }
+
           definirConteudo(`
             <div class="flex flex-col gap-4">
               <div class="card !p-0 overflow-hidden">
@@ -413,7 +426,7 @@
 
               <div class="card">
                 <div class="collapsible-header font-bold" onclick="alternarSecao(this)">
-                  <span>Nível 1 — Total de corridas cadastradas</span>
+                  <span>Nível 1 - Total de corridas cadastradas</span>
                   <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                 </div>
                 <div class="collapsible-body">
@@ -423,11 +436,30 @@
 
               <div class="card !p-0 overflow-hidden">
                 <div class="collapsible-header font-bold p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
-                  <span>Nível 2 e 3 — Corridas por circuito (${Array.isArray(circuitos) ? circuitos.length : 0})</span>
+                  <span>Nível 2 - Corridas por circuito (${Array.isArray(circuitos) ? circuitos.length : 0})</span>
                   <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                 </div>
                 <div class="collapsible-body p-4">
-                  <p class="text-sm text-zinc-400 mb-3">Clique em um circuito para expandir o nível 3 (corridas e pilotos).</p>
+                  <table class="w-full border-separate border-spacing-x-2">
+                    <tr>
+                      <th class="text-left py-2 border-b border-zinc-800">Circuito</th>
+                      <th class="text-left py-2 border-b border-zinc-800">Corridas</th>
+                      <th class="text-left py-2 border-b border-zinc-800">Mín. voltas</th>
+                      <th class="text-left py-2 border-b border-zinc-800">Média voltas</th>
+                      <th class="text-left py-2 border-b border-zinc-800">Máx. voltas</th>
+                    </tr>
+                    ${circuitosRows}
+                  </table>
+                </div>
+              </div>
+
+              <div class="card !p-0 overflow-hidden">
+                <div class="collapsible-header font-bold p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
+                  <span>Nível 3 - Detalhes por circuito</span>
+                  <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="collapsible-body p-4">
+                  <p class="text-sm text-zinc-400 mb-3">Clique em um circuito para ver corridas, datas, quantidade de voltas e quantidade de pilotos participantes.</p>
                   <div id="lista-circuitos" class="flex flex-col gap-2"></div>
                 </div>
               </div>
