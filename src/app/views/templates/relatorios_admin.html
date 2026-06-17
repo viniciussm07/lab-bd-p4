@@ -409,11 +409,11 @@
           definirConteudo(`
             <div class="flex flex-col gap-4">
               <div class="card !p-0 overflow-hidden">
-                <div class="collapsible-header font-bold p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
+                <div class="collapsible-header font-bold collapsed p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
                   <span>Escuderias cadastradas (${Array.isArray(escuderias) ? escuderias.length : 0})</span>
                   <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                 </div>
-                <div class="collapsible-body p-4">
+                <div class="collapsible-body collapsed p-4">
                   <table class="w-full border-separate border-spacing-x-2">
                     <tr>
                       <th class="text-left py-2 border-b border-zinc-800">Escuderia</th>
@@ -425,21 +425,21 @@
               </div>
 
               <div class="card">
-                <div class="collapsible-header font-bold" onclick="alternarSecao(this)">
+                <div class="collapsible-header font-bold collapsed" onclick="alternarSecao(this)">
                   <span>Nível 1 - Total de corridas cadastradas</span>
                   <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                 </div>
-                <div class="collapsible-body">
+                <div class="collapsible-body collapsed">
                   <p class="text-3xl font-bold text-[--f1-text-highlight]">${total.total_corridas ?? 0}</p>
                 </div>
               </div>
 
               <div class="card !p-0 overflow-hidden">
-                <div class="collapsible-header font-bold p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
+                <div class="collapsible-header font-bold collapsed p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
                   <span>Nível 2 - Corridas por circuito (${Array.isArray(circuitos) ? circuitos.length : 0})</span>
                   <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                 </div>
-                <div class="collapsible-body p-4">
+                <div class="collapsible-body collapsed p-4">
                   <table class="w-full border-separate border-spacing-x-2">
                     <tr>
                       <th class="text-left py-2 border-b border-zinc-800">Circuito</th>
@@ -454,11 +454,11 @@
               </div>
 
               <div class="card !p-0 overflow-hidden">
-                <div class="collapsible-header font-bold p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
+                <div class="collapsible-header font-bold collapsed p-4 border-b border-zinc-800" onclick="alternarSecao(this)">
                   <span>Nível 3 - Detalhes por circuito</span>
                   <svg class="collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                 </div>
-                <div class="collapsible-body p-4">
+                <div class="collapsible-body collapsed p-4">
                   <p class="text-sm text-zinc-400 mb-3">Clique em um circuito para ver corridas, datas, quantidade de voltas e quantidade de pilotos participantes.</p>
                   <div id="lista-circuitos" class="flex flex-col gap-2"></div>
                 </div>
