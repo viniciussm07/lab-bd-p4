@@ -8,9 +8,9 @@ import time
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'db'),  # 'db' é o nome do serviço no docker-compose
     'port': int(os.getenv('DB_PORT', '5432')),  # Porta interna do container
-    'user': os.getenv('DB_USER', 'arvore_user'),
-    'password': os.getenv('DB_PASSWORD', 'arvore_pass'),
-    'database': os.getenv('DB_NAME', 'arvore_urbana')
+    'user': os.getenv('DB_USER', 'admin'),
+    'password': os.getenv('DB_PASSWORD', 'admin123'),
+    'database': os.getenv('DB_NAME', 'formula1_db')
 }
 
 # Criar pool de conexões com retry
