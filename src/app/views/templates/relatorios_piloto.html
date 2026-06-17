@@ -96,17 +96,6 @@
       <div class="w-1/4 flex flex-col gap-4">
         <div class="card">
           <div class="collapsible-header font-bold" onclick="alternarSecao(this)">
-            <span>Navegação</span>
-            <span class="chevron">▼</span>
-          </div>
-          <div class="collapsible-body flex flex-col gap-1">
-            <a href="/dashboard" class="menu-item">Dashboard Piloto</a>
-            <span class="menu-item active">Relatórios Piloto</span>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="collapsible-header font-bold" onclick="alternarSecao(this)">
             <span>Relatórios disponíveis</span>
             <span class="chevron">▼</span>
           </div>
@@ -117,39 +106,6 @@
             <button onclick="carregarRelatorio7()" class="menu-item">
               Relatório 7: Status
             </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div
-            class="collapsible-header font-bold collapsed"
-            onclick="alternarSecao(this)"
-          >
-            <span>Opções do sistema (todos os perfis)</span>
-            <span class="chevron">▼</span>
-          </div>
-          <div class="collapsible-body collapsed text-sm text-zinc-400 flex flex-col gap-3">
-            <div>
-              <p class="text-zinc-200 font-semibold mb-1">Admin</p>
-              <ul class="list-disc pl-4 space-y-1">
-                <li>Dashboard: resumo, corridas, rankings</li>
-                <li>Relatórios 1, 2 e 3</li>
-              </ul>
-            </div>
-            <div>
-              <p class="text-zinc-200 font-semibold mb-1">Escuderia</p>
-              <ul class="list-disc pl-4 space-y-1">
-                <li>Dashboard: vitórias, pilotos, busca e CSV</li>
-                <li>Relatórios 4 e 5</li>
-              </ul>
-            </div>
-            <div>
-              <p class="text-zinc-200 font-semibold mb-1">Piloto</p>
-              <ul class="list-disc pl-4 space-y-1">
-                <li>Dashboard: anos e estatísticas</li>
-                <li>Relatórios 6 e 7</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
