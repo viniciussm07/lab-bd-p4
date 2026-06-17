@@ -6,6 +6,7 @@ Referência: enunciado em `ProjetoFinalEnunciado.pdf` (entrega: 17/06/2026).
 
 ## Índice
 
+- [Subir a base de dados](#subir-a-base-de-dados)
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Status de implementação](#status-de-implementação)
 - [Requisitos](#requisitos)
@@ -18,6 +19,51 @@ Referência: enunciado em `ProjetoFinalEnunciado.pdf` (entrega: 17/06/2026).
 - [Consultas e exercícios SQL](#consultas-e-exercícios-sql)
 - [Testar a API (Insomnia)](#testar-a-api-insomnia)
 
+## Subir a base de dados
+
+O projeto usa Docker Compose e um `Makefile` para subir o PostgreSQL e a aplicação Flask. A aplicação fica em `http://localhost:3000` após a stack estar no ar.
+
+### Primeira vez
+
+Na **primeira subida**, se a pasta `db/data` ainda não existir, o PostgreSQL executa automaticamente os scripts em `db/init/` (schema, carga dos CSVs, funções, triggers, etc.). Esse processo pode levar **alguns minutos**.
+
+Para evitar essa espera, o fluxo recomendado é restaurar um dump já pronto em `db/dumps/`:
+
+```bash
+make up-restore
+```
+
+Se preferir construir a base do zero pelos scripts SQL:
+
+```bash
+make up-init
+```
+
+Ou simplesmente `make up` com `db/data` vazio — o efeito é o mesmo que `up-init` na primeira execução (init completo, mais demorado).
+
+### Comandos principais
+
+| Comando | O que faz |
+|---------|-----------|
+| `make up` | Sobe Postgres + web **sem apagar** `db/data`. Se o volume já existir, o init **não** roda de novo. |
+| `make up-restore` | Apaga `db/data`, sobe o Postgres **sem** init e restaura o dump mais recente em `db/dumps/` (ou um arquivo específico com `FILE=db/dumps/arquivo.sql`). Mais rápido na primeira configuração. |
+| `make down` | Para os containers (dados em `db/data` são preservados). |
+| `make soft-clean` | Apaga `db/data` e para os containers. Na próxima subida com `make up`, o init roda de novo. |
+| `make clean` | Para a stack, remove imagens Docker usadas pelo compose e apaga `db/data`. Limpeza mais agressiva que `soft-clean`. |
+
+Exemplo com dump específico:
+
+```bash
+make up-restore FILE=db/dumps/formula1_db_20260603_191449.sql
+```
+
+### Reiniciar do zero
+
+```bash
+make soft-clean
+make up-restore    # rápido (dump) — ou make up-init / make up (init completo)
+```
+
 ## Estrutura do projeto
 
 ```
@@ -29,8 +75,9 @@ lab-bd-p4/
 ├── Makefile                  # up-init, up-restore, dump, psql, etc.
 ├── dados/                    # CSV/TSV de carga (F1 + geografia)
 ├── exercicios/               # SQL dos exercícios (montado no container em /home/exercicios)
-├── insomnia/                 # Coleção Insomnia + CSV de teste (upload pilotos)
-│   └── lab-bd-p4-api.json
+├── insomnia/                 # Coleção Insomnia + arquivos de teste
+│   ├── lab-bd-p4-api.json
+│   └── teste_pilotos.csv     # CSV de exemplo para upload de pilotos (Escuderia)
 ├── db/
 │   ├── init/
 │   │   ├── 01_schema.sql     # Esquema relacional
