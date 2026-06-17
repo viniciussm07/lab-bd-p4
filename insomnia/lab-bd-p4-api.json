@@ -11,7 +11,7 @@
       "modified": 1748908800000,
       "created": 1748908800000,
       "name": "Lab BD P4 - Formula 1 API",
-      "description": "Coleção para testar as rotas REST da aplicação Flask.\n\nOrdem sugerida:\n1. Login — grava o cookie auth_token\n2. Rotas em /api/piloto/* — exigem token de usuário Piloto\n3. Rotas em /api/escuderia/* — exigem token de usuário Escuderia\n\nCredenciais (seed em db/init/04_create_and_load_users.sql):\n- Piloto: hamilton_d / hamilton\n- Admin: admin / admin\n- Escuderia: ferrari_c / ferrari",
+      "description": "Coleção completa para testar a API Flask.\n\nAutenticação via cookie httponly auth_token (JWT).\n\nOrdem sugerida:\n1. Login (Piloto, Escuderia ou Admin)\n2. GET /api/me — validar perfil\n3. Rotas específicas do tipo de usuário\n4. POST /api/logout — encerrar sessão\n\nCredenciais (db/init/04_create_and_load_users.sql):\n- Piloto: hamilton_d / hamilton\n- Admin: admin / admin\n- Escuderia: ferrari_c / ferrari",
       "scope": "collection"
     },
     {
@@ -28,7 +28,8 @@
         "admin_login": "admin",
         "admin_password": "admin",
         "escuderia_login": "ferrari_c",
-        "escuderia_password": "ferrari"
+        "escuderia_password": "ferrari",
+        "piloto_sobrenome_busca": "Hamilton"
       },
       "dataPropertyOrder": {
         "&": [
@@ -38,7 +39,8 @@
           "admin_login",
           "admin_password",
           "escuderia_login",
-          "escuderia_password"
+          "escuderia_password",
+          "piloto_sobrenome_busca"
         ]
       },
       "color": null,
@@ -61,10 +63,22 @@
       "modified": 1748908800000,
       "created": 1748908800000,
       "name": "Autenticação",
-      "description": "POST /api/login — retorna JSON e define cookie httponly auth_token",
+      "description": "Login e logout — cookie auth_token",
       "environment": {},
       "environmentPropertyOrder": null,
-      "metaSortKey": -2000
+      "metaSortKey": -3000
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_comum",
+      "parentId": "wrk_lab_bdp4",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "name": "Perfil",
+      "description": "Rotas comuns a Piloto, Escuderia e Admin",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -2500
     },
     {
       "_type": "request_group",
@@ -73,10 +87,10 @@
       "modified": 1748908800000,
       "created": 1748908800000,
       "name": "Piloto",
-      "description": "Rotas protegidas — requer login como Piloto (tipo_permitido = Piloto)",
+      "description": "Requer login como Piloto",
       "environment": {},
       "environmentPropertyOrder": null,
-      "metaSortKey": -1000
+      "metaSortKey": -2000
     },
     {
       "_type": "request_group",
@@ -85,10 +99,22 @@
       "modified": 1748908800000,
       "created": 1748908800000,
       "name": "Escuderia",
-      "description": "Rotas protegidas — requer login como Escuderia (tipo_permitido = Escuderia)",
+      "description": "Requer login como Escuderia",
       "environment": {},
       "environmentPropertyOrder": null,
-      "metaSortKey": -500
+      "metaSortKey": -1500
+    },
+    {
+      "_type": "request_group",
+      "_id": "fld_views",
+      "parentId": "wrk_lab_bdp4",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "name": "Views (HTML)",
+      "description": "Telas renderizadas pelo Flask — retornam HTML, não JSON",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1000
     },
     {
       "_type": "request",
@@ -98,7 +124,7 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/login",
       "name": "Login (Piloto)",
-      "description": "Autentica um piloto. O token JWT é salvo no cookie auth_token (httponly).",
+      "description": "Autentica piloto. Grava cookie auth_token (httponly).",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
@@ -106,19 +132,11 @@
       },
       "parameters": [],
       "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json",
-          "id": "pair_ct_login_piloto"
-        },
-        {
-          "name": "Accept",
-          "value": "application/json",
-          "id": "pair_accept_login_piloto"
-        }
+        { "name": "Content-Type", "value": "application/json", "id": "pair_ct_login_piloto" },
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_login_piloto" }
       ],
       "authentication": {},
-      "metaSortKey": -3000,
+      "metaSortKey": -4000,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,
@@ -135,7 +153,7 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/login",
       "name": "Login (Admin)",
-      "description": "Login como Admin. Use para testar rotas de piloto e verificar resposta 403.",
+      "description": "Autentica administrador.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
@@ -143,19 +161,11 @@
       },
       "parameters": [],
       "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json",
-          "id": "pair_ct_login_admin"
-        },
-        {
-          "name": "Accept",
-          "value": "application/json",
-          "id": "pair_accept_login_admin"
-        }
+        { "name": "Content-Type", "value": "application/json", "id": "pair_ct_login_admin" },
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_login_admin" }
       ],
       "authentication": {},
-      "metaSortKey": -2000,
+      "metaSortKey": -3000,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,
@@ -172,7 +182,7 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/login",
       "name": "Login (Escuderia)",
-      "description": "Login como Escuderia. Necessário antes de POST /api/escuderia/piloto-arquivo.",
+      "description": "Autentica escuderia (ex.: ferrari_c).",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
@@ -180,16 +190,58 @@
       },
       "parameters": [],
       "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json",
-          "id": "pair_ct_login_escuderia"
-        },
-        {
-          "name": "Accept",
-          "value": "application/json",
-          "id": "pair_accept_login_escuderia"
-        }
+        { "name": "Content-Type", "value": "application/json", "id": "pair_ct_login_escuderia" },
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_login_escuderia" }
+      ],
+      "authentication": {},
+      "metaSortKey": -2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_logout",
+      "parentId": "fld_auth",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/logout",
+      "name": "Logout",
+      "description": "POST /api/logout — encerra sessão e remove cookie auth_token.",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_logout" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_me",
+      "parentId": "fld_comum",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/me",
+      "name": "Meu perfil",
+      "description": "GET /api/me — nome da escuderia (Piloto/Escuderia) ou perfil Admin.\nFunciona para qualquer tipo autenticado.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_me" }
       ],
       "authentication": {},
       "metaSortKey": -1000,
@@ -209,19 +261,15 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/piloto/anos-atividade",
       "name": "Anos de atividade",
-      "description": "GET /api/piloto/anos-atividade — anos em que o piloto logado participou de corridas.",
+      "description": "GET /api/piloto/anos-atividade",
       "method": "GET",
       "body": {},
       "parameters": [],
       "headers": [
-        {
-          "name": "Accept",
-          "value": "application/json",
-          "id": "pair_accept_anos"
-        }
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_anos" }
       ],
       "authentication": {},
-      "metaSortKey": -4000,
+      "metaSortKey": -5000,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,
@@ -238,19 +286,15 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/piloto/estatisticas",
       "name": "Estatísticas",
-      "description": "GET /api/piloto/estatisticas — estatísticas gerais do piloto logado.",
+      "description": "GET /api/piloto/estatisticas",
       "method": "GET",
       "body": {},
       "parameters": [],
       "headers": [
-        {
-          "name": "Accept",
-          "value": "application/json",
-          "id": "pair_accept_stats"
-        }
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_stats" }
       ],
       "authentication": {},
-      "metaSortKey": -3000,
+      "metaSortKey": -4000,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,
@@ -267,19 +311,15 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/piloto/relatorio-pontos-ano",
       "name": "Relatório — pontos por ano",
-      "description": "GET /api/piloto/relatorio-pontos-ano — relatório 6: pontos por ano.",
+      "description": "GET /api/piloto/relatorio-pontos-ano (relatório 6)",
       "method": "GET",
       "body": {},
       "parameters": [],
       "headers": [
-        {
-          "name": "Accept",
-          "value": "application/json",
-          "id": "pair_accept_rel6"
-        }
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_rel6" }
       ],
       "authentication": {},
-      "metaSortKey": -2000,
+      "metaSortKey": -3000,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,
@@ -296,19 +336,15 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/piloto/relatorio-contagem-status",
       "name": "Relatório — contagem por status",
-      "description": "GET /api/piloto/relatorio-contagem-status — relatório 7: contagem por status.",
+      "description": "GET /api/piloto/relatorio-contagem-status (relatório 7)",
       "method": "GET",
       "body": {},
       "parameters": [],
       "headers": [
-        {
-          "name": "Accept",
-          "value": "application/json",
-          "id": "pair_accept_rel7"
-        }
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_rel7" }
       ],
       "authentication": {},
-      "metaSortKey": -1000,
+      "metaSortKey": -2000,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,
@@ -325,7 +361,7 @@
       "created": 1748908800000,
       "url": "{{ _.base_url }}/api/escuderia/piloto-arquivo",
       "name": "Inserir pilotos via CSV",
-      "description": "POST /api/escuderia/piloto-arquivo — upload de CSV (multipart/form-data, campo file).\n\nColunas por linha (sem cabeçalho):\ndriver_ref, given_name, family_name, date_of_birth (YYYY-MM-DD), country_id\n\nExemplo: novo_piloto,Joao,Teste,1990-01-01,1\n\nArquivo de exemplo: insomnia/exemplo_pilotos.csv",
+      "description": "POST /api/escuderia/piloto-arquivo — multipart/form-data, campo file.\n\nColunas por linha (sem cabeçalho):\ndriver_ref, given_name, family_name, date_of_birth (YYYY-MM-DD), country_id\n\nArquivo de exemplo: insomnia/exemplo_pilotos.csv",
       "method": "POST",
       "body": {
         "mimeType": "multipart/form-data",
@@ -343,12 +379,235 @@
       },
       "parameters": [],
       "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_escuderia_upload" }
+      ],
+      "authentication": {},
+      "metaSortKey": -7000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_escuderia_piloto_sobrenome",
+      "parentId": "fld_escuderia",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/escuderia/piloto-sobrenome",
+      "name": "Consultar piloto por sobrenome",
+      "description": "GET /api/escuderia/piloto-sobrenome?sobrenome=...\nBusca pilotos da escuderia logada pelo sobrenome.",
+      "method": "GET",
+      "body": {},
+      "parameters": [
         {
-          "name": "Accept",
-          "value": "application/json",
-          "id": "pair_accept_escuderia_upload"
+          "id": "pair_param_sobrenome",
+          "name": "sobrenome",
+          "value": "{{ _.piloto_sobrenome_busca }}",
+          "description": "Sobrenome do piloto (ex.: Hamilton)",
+          "disabled": false
         }
       ],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_esc_sobrenome" }
+      ],
+      "authentication": {},
+      "metaSortKey": -6000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_escuderia_vitorias",
+      "parentId": "fld_escuderia",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/escuderia/vitorias",
+      "name": "Quantidade de vitórias",
+      "description": "GET /api/escuderia/vitorias",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_esc_vitorias" }
+      ],
+      "authentication": {},
+      "metaSortKey": -5000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_escuderia_qtd_pilotos",
+      "parentId": "fld_escuderia",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/escuderia/quantidade-pilotos",
+      "name": "Quantidade de pilotos",
+      "description": "GET /api/escuderia/quantidade-pilotos",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_esc_qtd_pilotos" }
+      ],
+      "authentication": {},
+      "metaSortKey": -4000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_escuderia_anos",
+      "parentId": "fld_escuderia",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/escuderia/anos-atividade",
+      "name": "Anos de atividade",
+      "description": "GET /api/escuderia/anos-atividade",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_esc_anos" }
+      ],
+      "authentication": {},
+      "metaSortKey": -3000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_escuderia_rel4",
+      "parentId": "fld_escuderia",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/escuderia/relatorio-pilotos-vitorias",
+      "name": "Relatório — pilotos e vitórias",
+      "description": "GET /api/escuderia/relatorio-pilotos-vitorias (relatório 4)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_esc_rel4" }
+      ],
+      "authentication": {},
+      "metaSortKey": -2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_escuderia_rel5",
+      "parentId": "fld_escuderia",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/api/escuderia/relatorio-contagem-status",
+      "name": "Relatório — contagem por status",
+      "description": "GET /api/escuderia/relatorio-contagem-status (relatório 5)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json", "id": "pair_accept_esc_rel5" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_view_login",
+      "parentId": "fld_views",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/",
+      "name": "Tela de login",
+      "description": "GET / — página HTML de login (sem autenticação).",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -3000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_view_dashboard",
+      "parentId": "fld_views",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/dashboard",
+      "name": "Dashboard",
+      "description": "GET /dashboard — HTML do dashboard (Piloto ou Escuderia). Requer login.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_type": "request",
+      "_id": "req_view_relatorios",
+      "parentId": "fld_views",
+      "modified": 1748908800000,
+      "created": 1748908800000,
+      "url": "{{ _.base_url }}/relatorios",
+      "name": "Relatórios",
+      "description": "GET /relatorios — HTML de relatórios (Piloto ou Escuderia). Requer login.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
       "authentication": {},
       "metaSortKey": -1000,
       "isPrivate": false,
